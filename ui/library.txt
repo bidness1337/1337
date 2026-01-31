@@ -3613,7 +3613,7 @@ local Library do
                 FontFace = Library.Font,
                 TextColor3 = FromRGB(215, 215, 215),
                 BorderColor3 = FromRGB(0, 0, 0),
-                Text = ConfigPopup.Name .. " Settings",
+                Text = ConfigPopup.Name .. "",
                 Name = "\0",
                 Size = UDim2New(1, 0, 0, 15),
                 BackgroundTransparency = 1,
@@ -6504,3 +6504,4 @@ getgenv().Library = Library
 
 
 return Library
+
