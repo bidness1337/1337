@@ -4856,12 +4856,41 @@ local Library do
         
         -- Initialize config elements from ConfigData
         if ConfigPopup.ConfigData then
-            for ConfigName, ConfigOptions in pairs(ConfigPopup.ConfigData) do
+            -- First, check if there's a custom order defined in the config
+            local customOrder = ConfigPopup.ConfigData._order
+            local configNames = {}
+            
+            if customOrder and type(customOrder) == "table" then
+                -- Use custom order if provided
+                for _, ConfigName in ipairs(customOrder) do
+                    if ConfigPopup.ConfigData[ConfigName] then
+                        TableInsert(configNames, ConfigName)
+                    end
+                end
+                -- Add any remaining configs not in the custom order
+                for ConfigName, ConfigOptions in pairs(ConfigPopup.ConfigData) do
+                    if ConfigName ~= "_order" and not TableFind(customOrder, ConfigName) then
+                        TableInsert(configNames, ConfigName)
+                    end
+                end
+            else
+                -- No custom order, use alphabetical order
+                for ConfigName, _ in pairs(ConfigPopup.ConfigData) do
+                    if ConfigName ~= "_order" then
+                        TableInsert(configNames, ConfigName)
+                    end
+                end
+                table.sort(configNames)
+            end
+            
+            -- Create elements in the determined order
+            for _, ConfigName in ipairs(configNames) do
+                local ConfigOptions = ConfigPopup.ConfigData[ConfigName]
                 local ConfigType = ConfigOptions.Type or "slider"
                 
                 if ConfigType == "slider" then
                     ConfigPopup:AddSlider({
-                        Name = ConfigName,
+                        Name = ConfigOptions.DisplayName or ConfigName, -- Allow custom display names
                         Min = ConfigOptions.Min,
                         Max = ConfigOptions.Max,
                         Default = ConfigOptions.Default,
@@ -4871,21 +4900,21 @@ local Library do
                     })
                 elseif ConfigType == "colorpicker" then
                     ConfigPopup:AddColorpicker({
-                        Name = ConfigName,
+                        Name = ConfigOptions.DisplayName or ConfigName,
                         Default = ConfigOptions.Default,
                         Alpha = ConfigOptions.Alpha,
                         Callback = ConfigOptions.Callback
                     })
                 elseif ConfigType == "keybind" then
                     ConfigPopup:AddKeybind({
-                        Name = ConfigName,
+                        Name = ConfigOptions.DisplayName or ConfigName,
                         Default = ConfigOptions.Default,
                         Mode = ConfigOptions.Mode,
                         Callback = ConfigOptions.Callback
                     })
                 elseif ConfigType == "dropdown" then
                     ConfigPopup:AddDropdown({
-                        Name = ConfigName,
+                        Name = ConfigOptions.DisplayName or ConfigName,
                         Items = ConfigOptions.Items,
                         Default = ConfigOptions.Default,
                         Multi = ConfigOptions.Multi,
@@ -4893,14 +4922,13 @@ local Library do
                     })
                 elseif ConfigType == "toggle" then
                     ConfigPopup:AddToggle({
-                        Name = ConfigName,
+                        Name = ConfigOptions.DisplayName or ConfigName,
                         Default = ConfigOptions.Default,
                         Callback = ConfigOptions.Callback
                     })
                 end
             end
-        end
-        
+        end 
         return ConfigPopup
     end
 
@@ -6504,4 +6532,3 @@ getgenv().Library = Library
 
 
 return Library
-
