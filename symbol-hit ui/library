@@ -2,7 +2,6 @@
 -- antiv4 better stay humble  https://discord.gg/RcCz9uZuZ6
 -- leaked by adignx
 
-
 local __M = {
     cache = {}::any,
 }
@@ -6415,3 +6414,7 @@ do
         end
     end
 end
+
+local v = __M.b()
+local lib = __M.c()
+
