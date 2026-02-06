@@ -1,77 +1,134 @@
--- Example usage
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/samets-drawing-lib-for-skids/refs/heads/main/symbol-hit%20ui/library2.lua"))()
+local LoadingTick = os.clock()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/samets-drawing-lib-for-skids/refs/heads/main/symbol-hit%20ui/library.lua"))()()
 
-local lib = Library({
-    Name = "My Custom Library",
-    AccentColor = Color3.fromHex('305261'),
-    TextColor = Color3.fromHex('546d88'),
-    BackgroundColor = Color3.fromHex('171717'),
-    FontSize = 20,
-    TweenSpeed = 0.2
+local Window = Library:Window({
+    Name = "wahwahwah",
+    Size = UDim2.new(0, 760, 0, 500),
+    Open = true,
+    FontSize = 20
 })
 
-local win = lib:Window({
-    name = 'Library',
-    size = UDim2.fromOffset(750, 550),
-    open = true,
-})
+-- Customize theme
+Library.Theme.Accent = Color3.fromHex('305261')
+Library.Theme.Text = Color3.fromHex('546d88')
+Library.Theme['Dark Text'] = Color3.fromHex('324250')
 
 -- Create tabs
-local ragebot_tab = win:Tab({
-    name = 'ragebot',
-    icon = lib.v.icons.ragebot,
+local CombatTab = Window:Tab({
+    Name = "Combat",
+    Icon = Library.icons.ragebot, -- Use the icons from the library
 })
 
-local misc_tab = win:Tab({
-    name = 'misc',
-    icon = lib.v.icons.misc,
+local MiscTab = Window:Tab({
+    Name = "Misc",
+    Icon = Library.icons.misc,
 })
 
-local visuals_tab = win:Tab({
-    name = 'visuals',
-    icon = lib.v.icons.visuals,
+local VisualsTab = Window:Tab({
+    Name = "Visuals",
+    Icon = Library.icons.visuals,
 })
 
-local settings_tab = win:Tab({
-    name = 'settings',
-    icon = lib.v.icons.settings,
+local SettingsTab = Window:Tab({
+    Name = "Settings",
+    Icon = Library.icons.settings,
 })
 
--- Add sections and controls
-local general_section = ragebot_tab:Section({
-    name = 'general',
-    description = 'main settings',
-    side = 'left',
+-- Create sections and elements
+local AimbotSection = CombatTab:Section({
+    Name = "Aimbot",
+    Side = "left",
+    Description = "Aimbot settings"
 })
 
-general_section:Toggle({
-    name = 'ragebot',
-    value = false,
-    callback = function(v)
-        lib.Flags.ragebot_enabled = v
-    end,
-    flag = 'ragebot_enabled',
+AimbotSection:Toggle({
+    Name = "Enabled",
+    Value = false,
+    Flag = "Aimbot_Enabled",
+    Callback = function(Value)
+        print("Aimbot:", Value)
+    end
 })
 
--- Add watermark
-local watermarkObj = lib:Watermark({
-    text = 'Library | {fps}',
-    visible = false,
-    rate = 0.2,
+AimbotSection:Keybind({
+    Name = "Aimbot Key",
+    Key = Enum.KeyCode.Z,
+    Mode = "Toggle",
+    Flag = "Aimbot_Key",
+    Callback = function(Value)
+        print("Aimbot Key:", Value)
+    end
 })
 
--- Add notification
-lib:Notification({
-    name = 'Library',
-    description = 'UI loaded successfully!',
-    type = 'Time',
-    time = 5,
+AimbotSection:Slider({
+    Name = "FOV",
+    Value = 180,
+    Min = 0,
+    Max = 360,
+    Float = 1,
+    Suffix = "%s°",
+    Flag = "Aimbot_FOV",
+    Callback = function(Value)
+        print("FOV:", Value)
+    end
 })
 
--- Set default tab
-ragebot_tab.Set(true)
+AimbotSection:Dropdown({
+    Name = "Target Selection",
+    Values = {"Closest to Crosshair", "Highest Health", "Lowest Health"},
+    Value = "Closest to Crosshair",
+    Flag = "Aimbot_Target",
+    Callback = function(Value)
+        print("Target:", Value)
+    end
+})
 
--- Add unload callback
-lib:AddUnloadCallback(function()
-    print("Library has been unloaded!")
-end)
+AimbotSection:Colorpicker({
+    Name = "FOV Color",
+    Value = Color3.fromRGB(255, 255, 255),
+    Alpha = 0,
+    Flag = "FOV_Color",
+    Callback = function(Value)
+        print("FOV Color:", Value)
+    end
+})
+
+-- Create a watermark
+local Watermark = Library.Watermark({
+    Text = 'Library | {fps} FPS | {ping} ms',
+    Visible = true,
+    Rate = 0.2
+})
+
+-- Create notification
+Library.Notification({
+    Name = "Library Loaded",
+    Description = string.format("Loaded in %.4f seconds", os.clock() - LoadingTick),
+    Type = "Time",
+    Time = 5
+})
+
+-- Settings tab example
+local SettingsSection = SettingsTab:Section({
+    Name = "Settings",
+    Side = "left"
+})
+
+SettingsSection:Toggle({
+    Name = "Watermark",
+    Value = true,
+    Flag = "Watermark_Enabled",
+    Callback = function(Value)
+        Watermark.SetVisible(Value)
+    end
+})
+
+SettingsSection:Keybind({
+    Name = "Menu Toggle",
+    Key = Enum.KeyCode.RightControl,
+    Mode = "Toggle",
+    Flag = "Menu_Key",
+    Callback = function(Value)
+        Window:Open()
+    end
+})
