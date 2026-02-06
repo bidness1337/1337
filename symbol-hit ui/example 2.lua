@@ -1,5 +1,5 @@
 -- Example usage
-local Library = loadstring(game:HttpGet("YOUR_RAW_GITHUB_URL_HERE"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/samets-drawing-lib-for-skids/refs/heads/main/symbol-hit%20ui/library2.lua"))()
 
 local lib = Library({
     Name = "My Custom Library",
