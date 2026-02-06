@@ -1,12 +1,11 @@
--- wahwahwah UI Library
--- Open Source Version
--- Load with: local wah = loadstring(game:HttpGet("URL"))()
+-- antiv4 better stay humble  https://discord.gg/RcCz9uZuZ6
+-- leaked by adignx
 
-return function()
+local function CreateLibrary()
     local __M = {
         cache = {}::any,
     }
-    
+ 
     do
         do
             local function __modImpl()
@@ -1547,12 +1546,12 @@ return function()
 
                             if not ignore then
                                 Objects.SaturationPickerOutline.Position = UDim2.new(math.clamp(Sat, 0, 1), Sat < 1 and 0 or 
-    -6, math.clamp(1 - Val, 0, 1), 1 - Val < 1 and 0 or -6)
+-6, math.clamp(1 - Val, 0, 1), 1 - Val < 1 and 0 or -6)
                                 Popup.HuePos = Hue
                                 Objects.HuePickerOutline.Position = UDim2.new(0, 0, math.clamp(1 - Hue, 0, 1), 1 - Hue < 1 and 0 or 
-    -10)
+-10)
                                 Objects.AlphaPickerOutline.Position = UDim2.new(math.clamp(alpha, 0, 1), alpha < 1 and 0 or 
-    -10, 0, 0)
+-10, 0, 0)
                             end
                             if Popup.SetFunc and type(Popup.SetFunc) == 'function' then
                                 Popup.SetFunc(color, alpha)
@@ -1735,7 +1734,7 @@ return function()
                                 Name = 'Outline',
                                 Size = cfg.size,
                                 Position = UDim2.new(0.5, -cfg.size.X.Offset / 2, 0.5, 
-    -cfg.size.Y.Offset / 2),
+-cfg.size.Y.Offset / 2),
                                 BorderSizePixel = 0,
                                 Parent = Objects.ScreenGui,
                                 ZIndex = ZIndex,
@@ -6086,7 +6085,7 @@ return function()
                             if Objects.Time then
                                 Objects.Time.BackgroundTransparency = 1 - (Lerp / 255)
                                 Objects.Time.Size = UDim2.new(0, (Outline.AbsoluteSize.X - 10) * math.clamp(((notification.Clock - Clock) / notification.Time) * 
-    -1, 0, 1), 0, 2)
+-1, 0, 1), 0, 2)
                             end
 
                             Offset = Offset + (Holder.AbsoluteSize.Y + 5) * (Lerp / 255)
@@ -6415,21 +6414,8 @@ return function()
             end
         end
     end
-    
-    -- Now create and return the library
-    local v = __M.b()
-    local lib = __M.c()
-    
-    -- Setup default theme
-    lib.Theme.Accent = Color3.fromHex('305261')
-    lib.Theme.Text = Color3.fromHex('546d88')
-    lib.Theme['Dark Text'] = Color3.fromHex('324250')
-    lib.Theme.Background = Color3.fromHex('1b1b1b')
-    lib.Theme['Section Background'] = Color3.fromHex('151515')
-    lib.Theme['Page Background'] = Color3.fromHex('171717')
-    lib.Theme['Light Text'] = Color3.fromHex('676767')
-    lib.Theme['Inline'] = Color3.fromHex('313131')
-    
-    -- Return the library
-    return lib
+
+    return __M.c()
 end
+
+return CreateLibrary
