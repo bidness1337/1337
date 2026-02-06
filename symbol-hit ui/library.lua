@@ -1,14 +1,10 @@
--- antiv4 Library - https://discord.gg/RcCz9uZuZ6
+-- antiv4 better stay humble  https://discord.gg/RcCz9uZuZ6
 -- leaked by adignx
--- Modified to work as a standalone library
-
-local Library = {}
-Library.__index = Library
 
 local __M = {
     cache = {}::any,
 }
-
+ 
 do
     do
         local function __modImpl()
@@ -79,7 +75,6 @@ do
 
                 return 0
             end
-            
             function cache.getPingMs()
                 local item = cache.Stats.Network.ServerStatsItem:FindFirstChild('Data Ping')
 
@@ -95,7 +90,6 @@ do
 
                 return 0
             end
-            
             function cache.getMainEvent()
                 return cache.ReplicatedStorage:WaitForChild('MainEvent')
             end
@@ -123,7 +117,6 @@ do
             return v.c
         end
     end
-    
     do
         local function __modImpl()
             local cache = __M.a()
@@ -187,13 +180,12 @@ do
             return v.c
         end
     end
-    
     do
         local function __modImpl()
             local Env = getgenv()
 
-            if Env.Library then
-                Env.Library.Utility.unload()
+            if Env.wahwahwah then
+                Env.wahwahwah.Utility.unload()
             end
 
             local Players = game:GetService('Players')
@@ -238,7 +230,7 @@ do
             local Loaded = false
             local Acceleration = Vector3.new(0, -Workspace.Gravity, 0)
 
-            Env.Library = {}
+            Env.wahwahwah = {}
 
             local BinLib = {
                 methods = {
@@ -276,7 +268,6 @@ do
 
                         return item
                     end
-                    
                     function bin:destroy()
                         if not (self and self.storage) then
                             return
@@ -295,23 +286,23 @@ do
                 end
             end
 
-            Env.Library.BinLib = BinLib
-            local Bin = BinLib.bin()
-            Env.Library.Bin = Bin
+            Env.wahwahwah.BinLib = BinLib
+            Bin = BinLib.bin()
+            Env.wahwahwah.Bin = Bin
 
             local Utility = {}
 
             do
                 function Utility.unload()
                     Bin:destroy()
-                    Env.Library = nil
+
+                    Env.wahwahwah = nil
                 end
-                
                 function Utility.Connect(connection)
                     Bin:add(connection)
+
                     return connection
                 end
-                
                 function Utility.New(sqr, props)
                     local Obj = Instance.new(sqr)
 
@@ -322,14 +313,14 @@ do
                     end
 
                     Bin:add(Obj)
+
                     return Obj
                 end
-                
                 function Utility.Round(number, float)
                     local Mult = 1 / (float or 1)
+
                     return math.floor(number * Mult + 0.5) / Mult
                 end
-                
                 function Utility.GetTrans(obj)
                     local Index
 
@@ -347,7 +338,6 @@ do
 
                     return Index
                 end
-                
                 function Utility.GetFiles(folder, extensions)
                     if not isfolder(folder) then
                         makefolder(folder)
@@ -368,9 +358,9 @@ do
 
                     return StoredFiles, FileNames
                 end
-                
                 function Utility.Lerp(a, b, c)
                     c = c or 0.125
+
                     local offset = math.abs(b - a)
 
                     if (offset < c) then
@@ -379,7 +369,6 @@ do
 
                     return a + (b - a) * c
                 end
-                
                 function Utility.LineMath(obj, from, to, thickness)
                     local Direction = (to - from)
                     local Center = (to + from) / 2
@@ -394,7 +383,7 @@ do
                 Utility.Signal = Utility.Connect
             end
 
-            Env.Library.Utility = Utility
+            Env.wahwahwah.Utility = Utility
 
             local Games = {
                 Data = {
@@ -478,20 +467,24 @@ do
 
             local Game = Games.GetGame()
             local GameName = Game and Game.Name or ''
-            local Folder = 'Library'
+            local Folder = 'wahwahwah'
 
             makefolder(Folder)
 
             local ImagesFolder = string.format('%s\\%s\\', Folder, 'Images')
+
             makefolder(ImagesFolder)
 
             local FontsFolder = string.format('%s\\%s\\', Folder, 'FontsFolder')
+
             makefolder(FontsFolder)
 
             local ConfigFolder = string.format('%s\\%s\\', Folder, 'Configs')
+
             makefolder(ConfigFolder)
 
             local SoundsFolder = string.format('%s\\%s\\', Folder, 'Sounds')
+
             makefolder(SoundsFolder)
 
             local Folders = {
@@ -510,7 +503,7 @@ do
                 end,
             }
 
-            Env.Library.Folders = Folders
+            Env.wahwahwah.Folders = Folders
 
             task.spawn(function()
                 local soundsPath = Folders.GetPath('Sounds')
@@ -528,6 +521,7 @@ do
 
                     if success and data then
                         writefile(path, data)
+
                         return true
                     end
 
@@ -607,7 +601,6 @@ do
                             return
                         end
                     end
-                    
                     if not isfile(JSON) then
                         local Font = {
                             name = font,
@@ -626,7 +619,6 @@ do
 
                     Fonts.Data[font] = Font.new(getcustomasset(JSON), Enum.FontWeight.Regular)
                 end
-                
                 function Fonts.Get(font)
                     return Fonts.Data[font]
                 end
@@ -636,7 +628,7 @@ do
                 end
             end
 
-            Env.Library.Fonts = Fonts
+            Env.wahwahwah.Fonts = Fonts
 
             local Images = {
                 URL = 
@@ -665,7 +657,6 @@ do
 
                     Images.Data[image] = getcustomasset(PNG)
                 end
-                
                 function Images.Get(image)
                     return Images.Data[image]
                 end
@@ -675,7 +666,7 @@ do
                 end
             end
 
-            Env.Library.Images = Images
+            Env.wahwahwah.Images = Images
 
             local AssetLoader = {
                 URL = 'https://raw.githubusercontent.com/GhoulSER/env/main/',
@@ -697,7 +688,6 @@ do
                         makefolder(self.AssetsFolder)
                     end
                 end
-                
                 function AssetLoader:LoadAsset(assetName)
                     local ext = assetName:match('%.([^%.]+)$') or 'png'
                     local fileName = assetName:match('%.([^%.]+)$') and assetName or (assetName .. '.png')
@@ -718,6 +708,7 @@ do
                             return asset
                         else
                             warn('[AssetLoader] Failed to load asset from file: ' .. filePath)
+
                             return nil
                         end
                     else
@@ -742,16 +733,17 @@ do
                                 return asset
                             else
                                 warn('[AssetLoader] Failed to load asset from file: ' .. filePath)
+
                                 return nil
                             end
                         else
                             warn('[AssetLoader] Failed to load ' .. fileName .. 
 [[ from GitHub. Make sure the file exists in the assets folder or on GitHub.]])
+
                             return nil
                         end
                     end
                 end
-                
                 function AssetLoader:GetCustomAsset(assetName)
                     if self.Data[assetName] then
                         return self.Data[assetName]
@@ -759,11 +751,9 @@ do
 
                     return self:LoadAsset(assetName)
                 end
-                
                 function AssetLoader:GetAssetNames()
                     return self.AssetNames
                 end
-                
                 function AssetLoader:LoadAll(assetNames)
                     if assetNames then
                         for _, name in ipairs(assetNames)do
@@ -781,20 +771,18 @@ do
                         end
                     end
                 end
-                
                 function AssetLoader:PreloadDefaults()
                     for _, name in ipairs(self.Names)do
                         self:LoadAsset(name)
                     end
                 end
             end
-            
             do
                 AssetLoader:PreloadDefaults()
                 AssetLoader:LoadAll()
             end
 
-            Env.Library.AssetLoader = AssetLoader
+            Env.wahwahwah.AssetLoader = AssetLoader
 
             local Library = {
                 TweenSpeed = 0.2,
@@ -909,20 +897,19 @@ do
                                 Obj[prop] = val
                             end
                         end
-                        
                         if theme then
                             Library.AddObjectTheme(Obj, theme)
                         end
 
                         table.insert(Utility.Objects, Obj)
+
                         return Obj
                     end
-                    
                     function Utility.Signal(connection)
                         table.insert(Utility.Connections, connection)
+
                         return connection
                     end
-                    
                     function Utility.GetTransparency(obj)
                         if obj:IsA('Frame') then
                             return 'BackgroundTransparency'
@@ -950,12 +937,11 @@ do
 
                         return nil
                     end
-                    
                     function Utility.Round(number, float)
                         local Mult = 1 / (float or 1)
+
                         return math.floor(number * Mult + 0.5) / Mult
                     end
-                    
                     function Utility.PositionOver(position, object, addedy)
                         addedy = addedy or 0
 
@@ -969,7 +955,6 @@ do
 
                         return false
                     end
-                    
                     function Utility.MouseOver(object, input)
                         local posX, posY = object.AbsolutePosition.X, object.AbsolutePosition.Y
                         local size = object.AbsoluteSize
@@ -982,9 +967,9 @@ do
 
                         return false
                     end
-                    
                     function Utility.Lerp(a, b, c)
                         c = c or 0.125
+
                         local offset = math.abs(b - a)
 
                         if (offset < c) then
@@ -993,7 +978,6 @@ do
 
                         return a + (b - a) * c
                     end
-                    
                     function Utility.StringToEnum(enumstring)
                         local EnumType, EnumValue = enumstring:match('Enum%.([^%.]+)%.(.+)')
 
@@ -1003,7 +987,6 @@ do
 
                         return nil
                     end
-                    
                     function Utility.TextTriggers(text)
                         local gameName = 'Universal'
                         local success, result = pcall(function()
@@ -1046,11 +1029,13 @@ do
 
                 function Library.Tween(obj, props, tweeninfo)
                     tweeninfo = tweeninfo or TweenInfo.new(Library.TweenSpeed, Library.TweenStyle)
+
                     local Tween = TweenService:Create(obj, tweeninfo, props)
+
                     Tween:Play()
+
                     return Tween
                 end
-                
                 function Library.Fade(obj, prop, vis)
                     if not obj or not prop or not pcall(function()
                         return obj.Visible
@@ -1059,6 +1044,7 @@ do
                     end
 
                     local OldTransparency = obj[prop]
+
                     obj[prop] = vis and 1 or OldTransparency
 
                     local Tween = Library.Tween(obj, {
@@ -1068,13 +1054,13 @@ do
                     Utility.Signal(Tween.Completed:Connect(function()
                         if not vis then
                             task.wait()
+
                             obj[prop] = OldTransparency
                         end
                     end))
 
                     return Tween
                 end
-                
                 function Library.AddObjectTheme(object, props)
                     local Theme = {
                         Props = props,
@@ -1091,7 +1077,6 @@ do
 
                     Library.ThemeObjects[object] = Theme
                 end
-                
                 function Library.ChangeObjectTheme(object, props, tweened)
                     local Theme = Library.ThemeObjects[object]
 
@@ -1113,7 +1098,6 @@ do
                         end
                     end
                 end
-                
                 function Library.UpdateTheme(theme, color)
                     if not Library.Theme[theme] then
                         return
@@ -1133,14 +1117,12 @@ do
                         end
                     end
                 end
-                
                 function Library.Config(cfg, default)
                     local Table = {}
 
                     for name, val in cfg do
                         Table[name:lower()] = val
                     end
-                    
                     for name, val in default do
                         if Table[name] == nil then
                             Table[name] = val
@@ -1149,7 +1131,6 @@ do
 
                     return Table
                 end
-                
                 function Library.Resize(holder, box)
                     local Start, StartSize, Resizing
                     local CurrentSize = holder.Size
@@ -1162,8 +1143,9 @@ do
                             StartSize = holder.Size
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                    Utility.Signal(UserInputService.InputChanged:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseMovement and Resizing then
                             local ViewportSize = Camera.ViewportSize
 
@@ -1171,14 +1153,14 @@ do
                             holder.Size = CurrentSize
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                    Utility.Signal(UserInputService.InputEnded:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 then
                             Resizing = false
                         end
                     end))
                 end
-                
                 function Library.Dragging(holder, box)
                     local Start, StartPos, Dragging
                     local CurrentPos
@@ -1191,8 +1173,9 @@ do
                             StartPos = holder.AbsolutePosition
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                    Utility.Signal(UserInputService.InputChanged:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseMovement and Dragging then
                             local MaxSize = holder.AbsoluteSize
                             local ViewportSize = Camera.ViewportSize
@@ -1201,14 +1184,14 @@ do
                             holder.Position = CurrentPos
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                    Utility.Signal(UserInputService.InputEnded:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 then
                             Dragging = false
                         end
                     end))
                 end
-                
                 function Library.ColorpickerWindow(self)
                     local Popup = {
                         Visible = false,
@@ -1221,7 +1204,6 @@ do
                         Color = Color3.new(1, 1, 1),
                         HuePos = nil,
                     }
-                    
                     local ZIndex = Popup.ZIndex
                     local Objects = Popup.Objects
 
@@ -1264,7 +1246,6 @@ do
                             Parent = Objects.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Objects.Background,
@@ -1402,7 +1383,6 @@ do
                             Parent = Objects.HueBackground,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIGradient', {
                             Color = ColorSequence.new{
                                 ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
@@ -1508,7 +1488,6 @@ do
                             Parent = Objects.AlphaBackground,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIGradient', {
                             Parent = Objects.AlphaBackground,
                             Rotation = 180,
@@ -1565,12 +1544,14 @@ do
                         Popup.Alpha = alpha
 
                         if not ignore then
-                            Objects.SaturationPickerOutline.Position = UDim2.new(math.clamp(Sat, 0, 1), Sat < 1 and 0 or -6, math.clamp(1 - Val, 0, 1), 1 - Val < 1 and 0 or -6)
+                            Objects.SaturationPickerOutline.Position = UDim2.new(math.clamp(Sat, 0, 1), Sat < 1 and 0 or 
+-6, math.clamp(1 - Val, 0, 1), 1 - Val < 1 and 0 or -6)
                             Popup.HuePos = Hue
-                            Objects.HuePickerOutline.Position = UDim2.new(0, 0, math.clamp(1 - Hue, 0, 1), 1 - Hue < 1 and 0 or -10)
-                            Objects.AlphaPickerOutline.Position = UDim2.new(math.clamp(alpha, 0, 1), alpha < 1 and 0 or -10, 0, 0)
+                            Objects.HuePickerOutline.Position = UDim2.new(0, 0, math.clamp(1 - Hue, 0, 1), 1 - Hue < 1 and 0 or 
+-10)
+                            Objects.AlphaPickerOutline.Position = UDim2.new(math.clamp(alpha, 0, 1), alpha < 1 and 0 or 
+-10, 0, 0)
                         end
-                        
                         if Popup.SetFunc and type(Popup.SetFunc) == 'function' then
                             Popup.SetFunc(color, alpha)
                         end
@@ -1581,7 +1562,6 @@ do
                         Objects.AlphaBackground.BackgroundColor3 = color
                         Objects.SaturationBackground.BackgroundColor3 = Color3.fromHSV(Popup.HuePos, 1, 1)
                     end
-                    
                     function Popup.Open(position)
                         if Popup.Tweening then
                             return
@@ -1595,6 +1575,7 @@ do
                         end
 
                         local ParentObjects = Objects.Outline:GetDescendants()
+
                         table.insert(ParentObjects, Objects.Outline)
 
                         for _, obj in ParentObjects do
@@ -1616,6 +1597,7 @@ do
                         end
 
                         local Size = Objects.Outline.AbsoluteSize
+
                         Objects.Outline.Size = Popup.Visible and UDim2.new(0, Size.X, 0, 20) or UDim2.new(0, Size.X, 0, Size.Y)
 
                         local Tween = Library.Tween(Objects.Outline, {
@@ -1628,7 +1610,6 @@ do
                             Popup.Tweening = false
                         end))
                     end
-                    
                     function Popup.SlideSaturation(input)
                         local SizeX = math.clamp((input.Position.X - Objects.SaturationOutline.AbsolutePosition.X) / Objects.SaturationOutline.AbsoluteSize.X, 0, 1)
                         local SizeY = 1 - math.clamp((input.Position.Y - Objects.SaturationOutline.AbsolutePosition.Y) / Objects.SaturationOutline.AbsoluteSize.Y, 0, 1)
@@ -1639,8 +1620,10 @@ do
                         Popup.Set(Color3.fromHSV(Popup.HuePos, SizeX, SizeY), Popup.Alpha, true)
                     end
 
-                    Utility.Signal(Objects.SaturationOutline.MouseButton1Down:Connect(function()
+                    Utility.Signal(Objects.SaturationOutline.MouseButton1Down:Connect(function(
+                    )
                         Popup.SlidingSaturation = true
+
                         Popup.SlideSaturation({
                             Position = UserInputService:GetMouseLocation() - Vector2.new(0, 62),
                         })
@@ -1656,8 +1639,10 @@ do
                         Popup.Set(Color3.fromHSV(SizeY, Sat, Val), Popup.Alpha, true)
                     end
 
-                    Utility.Signal(Objects.HueOutline.MouseButton1Down:Connect(function()
+                    Utility.Signal(Objects.HueOutline.MouseButton1Down:Connect(function(
+                    )
                         Popup.SlidingHue = true
+
                         Popup.SlideHue({
                             Position = UserInputService:GetMouseLocation() - Vector2.new(0, 62),
                         })
@@ -1672,27 +1657,28 @@ do
                         Popup.Set(Popup.Color, SizeX, true)
                     end
 
-                    Utility.Signal(Objects.AlphaOutline.MouseButton1Down:Connect(function()
+                    Utility.Signal(Objects.AlphaOutline.MouseButton1Down:Connect(function(
+                    )
                         Popup.SlidingAlpha = true
+
                         Popup.SlideAlpha({
                             Position = UserInputService:GetMouseLocation(),
                         })
                     end))
-                    
-                    Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                    Utility.Signal(UserInputService.InputChanged:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseMovement then
                             if Popup.SlidingSaturation then
                                 Popup.SlideSaturation({
                                     Position = UserInputService:GetMouseLocation() - Vector2.new(0, 62),
                                 })
                             end
-                            
                             if Popup.SlidingHue then
                                 Popup.SlideHue({
                                     Position = UserInputService:GetMouseLocation() - Vector2.new(0, 62),
                                 })
                             end
-                            
                             if Popup.SlidingAlpha then
                                 Popup.SlideAlpha({
                                     Position = UserInputService:GetMouseLocation(),
@@ -1700,8 +1686,9 @@ do
                             end
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                    Utility.Signal(UserInputService.InputEnded:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 then
                             Popup.SlidingSaturation, Popup.SlidingHue, Popup.SlidingAlpha = false, false, false
                         end
@@ -1712,6 +1699,7 @@ do
 
                 do
                     local ColorpickerWindowFunc = Library.ColorpickerWindow
+
                     Library.ColorpickerWindow = ColorpickerWindowFunc({ZIndex = 5000})
                 end
 
@@ -1732,7 +1720,6 @@ do
                         ZIndex = 0,
                         Tabs = {},
                     }
-                    
                     local ZIndex = Window.ZIndex
                     local Objects = Window.Objects
 
@@ -1742,11 +1729,11 @@ do
                             Parent = HiddenUI,
                             IgnoreGuiInset = true,
                         })
-                        
                         Objects.Outline = Utility.New('Frame', {
                             Name = 'Outline',
                             Size = cfg.size,
-                            Position = UDim2.new(0.5, -cfg.size.X.Offset / 2, 0.5, -cfg.size.Y.Offset / 2),
+                            Position = UDim2.new(0.5, -cfg.size.X.Offset / 2, 0.5, 
+-cfg.size.Y.Offset / 2),
                             BorderSizePixel = 0,
                             Parent = Objects.ScreenGui,
                             ZIndex = ZIndex,
@@ -1798,9 +1785,7 @@ do
                             Parent = Objects.SideBackground,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Library.Dragging(Objects.Outline, Objects.SideBackground)
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingLeft = UDim.new(0, 5),
@@ -1826,9 +1811,7 @@ do
                         }, {
                             TextColor3 = 'Text',
                         })
-                        
                         Objects.Title.Size = UDim2.new(1, 0, 0, Objects.Title.TextBounds.Y + 22)
-                        
                         Objects.SideScroll = Utility.New('ScrollingFrame', {
                             Name = 'SideScroll',
                             Size = UDim2.new(1, 0, 1, -Objects.Title.AbsoluteSize.Y),
@@ -1846,7 +1829,6 @@ do
                         }, {
                             ScrollBarImageColor3 = 'Accent',
                         })
-                        
                         Objects.SideContent = Utility.New('Frame', {
                             Name = 'SideContent',
                             Size = UDim2.new(1, 0, 0, 0),
@@ -1858,22 +1840,22 @@ do
                             ZIndex = ZIndex,
                         })
 
-                        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
+                        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function(
+                        )
                             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
                             else
                                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
                             end
                         end))
-                        
-                        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+                        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function(
+                        )
                             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
                             else
                                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
                             end
                         end))
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             FillDirection = Enum.FillDirection.Vertical,
@@ -1883,7 +1865,6 @@ do
                         })
 
                         Window.SideHolder = Objects.SideContent
-                        
                         Objects.ResizeBar = Utility.New('Frame', {
                             Name = 'ResizeBar',
                             BorderSizePixel = 0,
@@ -1933,7 +1914,6 @@ do
                                 popup.Visible(false)
                             end
                         end
-                        
                         for _, dropdown in Library.Dropdowns do
                             if dropdown.Visible then
                                 dropdown.Open()
@@ -1984,7 +1964,6 @@ do
 
                     return setmetatable(Window, Library)
                 end
-                
                 function Library.Info(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -1995,7 +1974,6 @@ do
                         Objects = {},
                         ZIndex = self.ZIndex,
                     }
-                    
                     local ZIndex = Info.ZIndex
                     local Objects = Info.Objects
 
@@ -2041,7 +2019,6 @@ do
 
                     return setmetatable(Info, Library)
                 end
-                
                 function Library.Tab(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -2056,7 +2033,6 @@ do
                         Sections = {},
                         Name = cfg.name,
                     }
-                    
                     local ZIndex = Tab.ZIndex
                     local Objects = Tab.Objects
 
@@ -2068,7 +2044,6 @@ do
                             Parent = self.SideHolder,
                             ZIndex = ZIndex,
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Background = Utility.New('TextButton', {
                             Name = 'Background',
@@ -2086,7 +2061,6 @@ do
                         }, {
                             BackgroundColor3 = 'Background',
                         })
-                        
                         ZIndex = ZIndex + 1
 
                         Utility.New('UICorner', {
@@ -2094,7 +2068,6 @@ do
                             Parent = Objects.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Objects.Background,
@@ -2103,7 +2076,6 @@ do
                             PaddingTop = UDim.new(0, 6),
                             PaddingBottom = UDim.new(0, 6),
                         })
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             Parent = Objects.Background,
@@ -2142,7 +2114,6 @@ do
                         }, {
                             TextColor3 = 'Dark Text',
                         })
-                        
                         Objects.Text.Size = UDim2.new(0, Objects.Text.TextBounds.X, 0, Objects.Text.TextBounds.Y - 2)
 
                         if Objects.Icon then
@@ -2158,7 +2129,6 @@ do
                             Visible = false,
                             ZIndex = ZIndex,
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Left = Utility.New('Frame', {
                             Name = 'Left',
@@ -2171,7 +2141,6 @@ do
                         })
 
                         table.insert(Tab.Sections, Objects.Left)
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             Parent = Objects.Left,
@@ -2182,7 +2151,6 @@ do
                         })
 
                         Tab.left = Objects.Left
-                        
                         Objects.Right = Utility.New('Frame', {
                             Name = 'Right',
                             BackgroundTransparency = 1,
@@ -2194,7 +2162,6 @@ do
                         })
 
                         table.insert(Tab.Sections, Objects.Right)
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             Parent = Objects.Right,
@@ -2217,7 +2184,6 @@ do
                         Library.Tween(Objects.Background, {
                             BackgroundTransparency = status and 0 or 1,
                         })
-                        
                         Library.ChangeObjectTheme(Objects.Text, {
                             TextColor3 = status and 'Text' or 'Dark Text',
                         }, true)
@@ -2239,7 +2205,6 @@ do
                                         tab.Set(false, true)
                                     end
                                 end
-                                
                                 for _, obj in Objects.Page:GetDescendants()do
                                     local Index = Utility.GetTransparency(obj)
 
@@ -2267,15 +2232,14 @@ do
                         end
                     end
 
-                    Utility.Signal(Objects.Background.MouseButton1Click:Connect(function()
+                    Utility.Signal(Objects.Background.MouseButton1Click:Connect(function(
+                    )
                         Tab.Set(true)
                     end))
-                    
                     table.insert(self.Tabs, Tab)
 
                     return setmetatable(Tab, Library)
                 end
-                
                 function Library.Section(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -2291,7 +2255,6 @@ do
                         Resizing = false,
                         Dragging = false,
                     }
-                    
                     local Parent = self[cfg.side:lower()]
                     local ZIndex = Section.ZIndex
                     local Objects = Section.Objects
@@ -2320,7 +2283,6 @@ do
                             MinSize = Vector2.new(math.huge, cfg.size or math.huge),
                             MinSize = Vector2.new(0, 40),
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Dragging = Utility.New('TextButton', {
                             Name = 'Dragging',
@@ -2334,7 +2296,6 @@ do
                             Parent = Objects.Outline,
                             ZIndex = ZIndex,
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.TopInline = Utility.New('Frame', {
                             Name = 'TopInline',
@@ -2371,7 +2332,6 @@ do
                             Parent = Objects.TopBackground,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Objects.TopBackground,
@@ -2380,7 +2340,6 @@ do
                             PaddingTop = UDim.new(0, 2),
                             PaddingBottom = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             Parent = Objects.TopBackground,
@@ -2406,7 +2365,6 @@ do
                         }, {
                             TextColor3 = 'Text',
                         })
-                        
                         ZIndex = ZIndex + 1
 
                         if cfg.description then
@@ -2426,7 +2384,6 @@ do
                             }, {
                                 TextColor3 = 'Light Text',
                             })
-                            
                             ZIndex = ZIndex + 1
                         end
 
@@ -2440,7 +2397,6 @@ do
                         }, {
                             BackgroundColor3 = 'Inline',
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.TopCoverBackground = Utility.New('Frame', {
                             Name = 'TopCoverBackground',
@@ -2452,7 +2408,6 @@ do
                         }, {
                             BackgroundColor3 = 'Background',
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Padded = Utility.New('Frame', {
                             Name = 'Padded',
@@ -2463,7 +2418,6 @@ do
                             Parent = Objects.Outline,
                             ZIndex = ZIndex,
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Scrolling = Utility.New('ScrollingFrame', {
                             Name = 'Scrolling',
@@ -2482,7 +2436,6 @@ do
                         }, {
                             ScrollBarImageColor3 = 'Accent',
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Content = Utility.New('Frame', {
                             Name = 'Content',
@@ -2494,7 +2447,6 @@ do
                             Parent = Objects.Scrolling,
                             ZIndex = ZIndex,
                         })
-                        
                         Section.Holder = Objects.Content
 
                         Utility.New('UIListLayout', {
@@ -2507,15 +2459,16 @@ do
 
                         ZIndex = ZIndex + 1
 
-                        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
+                        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function(
+                        )
                             if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
                                 Objects.Content.Size = UDim2.new(1, -7, 0, 0)
                             else
                                 Objects.Content.Size = UDim2.new(1, 0, 0, 0)
                             end
                         end))
-                        
-                        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+                        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteSize'):Connect(function(
+                        )
                             if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
                                 Objects.Content.Size = UDim2.new(1, -7, 0, 0)
                             else
@@ -2539,24 +2492,28 @@ do
 
                     Section.ZIndex = ZIndex
 
-                    Utility.Signal(Objects.ResizeBar.MouseButton1Down:Connect(function()
+                    Utility.Signal(Objects.ResizeBar.MouseButton1Down:Connect(function(
+                    )
                         Library.ChangeObjectTheme(Objects.Title, {
                             TextColor3 = 'Accent',
                         }, true)
 
                         Section.Resizing = true
 
-                        local Resize = Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                        local Resize = Utility.Signal(UserInputService.InputChanged:Connect(function(
+                            input
+                        )
                             if not Section.Resizing or input.UserInputType ~= Enum.UserInputType.MouseMovement then
                                 return
                             end
 
                             Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.Outline.AbsolutePosition.Y, 25, 9e9))
                         end))
-                        
                         local ResizeStop
 
-                        ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                        ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(
+                            input
+                        )
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 Section.Resizing = false
 
@@ -2571,7 +2528,8 @@ do
 
                     Section.OldParent = Objects.Outline.Parent
 
-                    Utility.Signal(Objects.Dragging.MouseButton1Down:Connect(function()
+                    Utility.Signal(Objects.Dragging.MouseButton1Down:Connect(function(
+                    )
                         Section.Dragging = true
 
                         local MousePosition = UserInputService:GetMouseLocation()
@@ -2582,7 +2540,9 @@ do
                         Objects.Outline.Parent = Library.ScreenGui
 
                         local ClosestHolder, Indicator
-                        local Drag = Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                        local Drag = Utility.Signal(UserInputService.InputChanged:Connect(function(
+                            input
+                        )
                             if not Section.Dragging or input.UserInputType ~= Enum.UserInputType.MouseMovement then
                                 return
                             end
@@ -2632,7 +2592,6 @@ do
                                         Parent = Background,
                                         CornerRadius = UDim.new(0, 5),
                                     })
-                                    
                                     Utility.New('UISizeConstraint', {
                                         Parent = Indicator,
                                         MaxSize = Objects.Constraint.MaxSize,
@@ -2646,14 +2605,16 @@ do
                             else
                                 if Indicator then
                                     Indicator:Destroy()
+
                                     Indicator = nil
                                 end
                             end
-                        }))
-                        
+                        end))
                         local DragStop
 
-                        DragStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                        DragStop = Utility.Signal(UserInputService.InputEnded:Connect(function(
+                            input
+                        )
                             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                                 Section.Dragging = false
 
@@ -2668,7 +2629,6 @@ do
                                 else
                                     Objects.Outline.Parent = Section.OldParent
                                 end
-                                
                                 if Indicator then
                                     Indicator:Destroy()
                                 end
@@ -2678,7 +2638,6 @@ do
 
                     return setmetatable(Section, Library)
                 end
-                
                 function Library.PopupMenu(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {size = 120})
@@ -2690,7 +2649,6 @@ do
                         ParentPopup = nil,
                         ChildPopups = {},
                     }
-                    
                     local ZIndex = Popup.ZIndex
                     local Objects = Popup.Objects
 
@@ -2734,7 +2692,6 @@ do
                             Parent = Objects.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Objects.Background,
@@ -2768,7 +2725,11 @@ do
 
                     Popup.ZIndex = ZIndex
 
-                    function Popup.Visible(visibility, position, stopPropagation)
+                    function Popup.Visible(
+                        visibility,
+                        position,
+                        stopPropagation
+                    )
                         if Popup.Tweening then
                             return
                         end
@@ -2803,6 +2764,7 @@ do
                         end
 
                         local ParentObjects = Objects.Outline:GetDescendants()
+
                         table.insert(ParentObjects, Objects.Outline)
 
                         for _, obj in ParentObjects do
@@ -2810,7 +2772,6 @@ do
 
                             if not Index then
                             end
-                            
                             if type(Index) == 'table' then
                                 for _, prop in Index do
                                     Library.Fade(obj, prop, visibility)
@@ -2845,7 +2806,6 @@ do
                                         childPopup.Visible(false)
                                     end
                                 end
-                                
                                 for _, dropdown in pairs(Library.Dropdowns)do
                                     if dropdown.ParentPopup == Popup and dropdown.Visible then
                                         dropdown.Open()
@@ -2854,20 +2814,22 @@ do
                             end
                         end))
                     end
-                    
                     function Popup:NestedPopup(cfg)
                         local NestedPopup = Library.PopupMenu(self, cfg)
+
                         NestedPopup.ParentPopup = self
+
                         table.insert(self.ChildPopups, NestedPopup)
+
                         return NestedPopup
                     end
-                    
                     function Popup:GetParentChain()
                         local chain = {}
                         local current = self
 
                         while current do
                             table.insert(chain, current)
+
                             current = current.ParentPopup
                         end
 
@@ -2878,7 +2840,6 @@ do
 
                     return setmetatable(Popup, Library)
                 end
-                
                 function Library.Popup(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {size = 120})
@@ -2888,7 +2849,6 @@ do
                         ZIndex = self.ZIndex,
                         Visible = false,
                     }
-                    
                     local ZIndex = Cog.ZIndex
                     local Objects = Cog.Objects
 
@@ -2914,7 +2874,6 @@ do
                         Popup.Objects.Outline,
                         (Library.ColorpickerWindow and type(Library.ColorpickerWindow) == 'table' and Library.ColorpickerWindow.Objects and Library.ColorpickerWindow.Objects.Outline) or nil,
                     }
-                    
                     Popup.ParentElement = self
 
                     function Cog.InsideBounds(input)
@@ -2923,7 +2882,6 @@ do
                                 return true
                             end
                         end
-                        
                         for _, childPopup in pairs(Popup.ChildPopups)do
                             if childPopup.Objects.Outline.Visible then
                                 if Utility.MouseOver(childPopup.Objects.Outline, input) then
@@ -2944,7 +2902,9 @@ do
                     if not Library.GlobalPopupClickHandler then
                         Library.GlobalPopupClickHandler = true
 
-                        Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                        Utility.Signal(UserInputService.InputBegan:Connect(function(
+                            input
+                        )
                             if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
                                 return
                             end
@@ -2968,6 +2928,7 @@ do
                                 if isLibraryUI(obj) then
                                     if obj:IsA('ImageButton') or obj:IsA('TextButton') then
                                         ignoreCloseCheck = true
+
                                         break
                                     end
                                 end
@@ -2979,7 +2940,10 @@ do
 
                             for _, popup in pairs(Library.Popups)do
                                 if popup.Objects.Outline.Visible then
-                                    local function isInsidePopupHierarchy(p, input)
+                                    local function isInsidePopupHierarchy(
+                                        p,
+                                        input
+                                    )
                                         if Utility.MouseOver(p.Objects.Outline, input) then
                                             return true
                                         end
@@ -2996,7 +2960,10 @@ do
                                     if not isInsidePopupHierarchy(popup, input) then
                                         local isChildOfActiveParent = false
 
-                                        local function isInParentOfPopup(p, input)
+                                        local function isInParentOfPopup(
+                                            p,
+                                            input
+                                        )
                                             if p.ParentPopup and p.ParentPopup.Objects.Outline.Visible then
                                                 if Utility.MouseOver(p.ParentPopup.Objects.Outline, input) then
                                                     return true
@@ -3020,7 +2987,6 @@ do
                                     end
                                 end
                             end
-                            
                             for _, dropdown in pairs(Library.Dropdowns)do
                                 if dropdown.Visible then
                                     if not Utility.MouseOver(dropdown.Popup.Outline, input) and not Utility.MouseOver(dropdown.Objects.Outline, input) then
@@ -3031,7 +2997,8 @@ do
                         end))
                     end
 
-                    Utility.Signal(Objects.Icon:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+                    Utility.Signal(Objects.Icon:GetPropertyChangedSignal('AbsolutePosition'):Connect(function(
+                    )
                         if Popup.Objects.Outline.Visible then
                             local AbsolutePosition = Objects.Icon.AbsolutePosition
                             local AbsoluteSize = Objects.Icon.AbsoluteSize
@@ -3039,8 +3006,8 @@ do
                             Popup.Objects.Outline.Position = UDim2.new(0, AbsolutePosition.x, 0, AbsolutePosition.y + AbsoluteSize.y + 5)
                         end
                     end))
-                    
-                    Utility.Signal(Objects.Icon.MouseButton1Click:Connect(function()
+                    Utility.Signal(Objects.Icon.MouseButton1Click:Connect(function(
+                    )
                         Cog.Visible = not Cog.Visible
 
                         local AbsolutePosition = Objects.Icon.AbsolutePosition
@@ -3052,12 +3019,12 @@ do
                         }, true)
 
                         local stopPropagation = true
+
                         Popup.Visible(Cog.Visible, Position, stopPropagation)
                     end))
 
                     return Popup
                 end
-                
                 function Library.Toggle(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -3079,7 +3046,6 @@ do
                         ZIndex = self.ZIndex,
                         Value = false,
                     }
-                    
                     local ZIndex = Toggle.ZIndex
                     local Objects = Toggle.Objects
 
@@ -3206,7 +3172,6 @@ do
                         }, {
                             BackgroundColor3 = 'Inline',
                         })
-                        
                         Objects.Outline.Size = UDim2.new(0, Objects.Text.AbsoluteSize.Y, 0, Objects.Text.AbsoluteSize.Y)
 
                         Utility.New('UICorner', {
@@ -3281,11 +3246,9 @@ do
                         if cfg.children == nil and not Toggle.Holder then
                             return
                         end
-                        
                         if Toggle.Tweening then
                             return
                         end
-                        
                         if visibility == Objects.ChildrenHolder.Visible then
                             return
                         end
@@ -3301,7 +3264,6 @@ do
 
                             if not Index then
                             end
-                            
                             if type(Index) == 'table' then
                                 for _, prop in Index do
                                     Library.Fade(obj, prop, visibility)
@@ -3327,7 +3289,6 @@ do
                             Objects.ChildrenHolder.Visible = visibility
                         end))
                     end
-                    
                     function Toggle.Set(value)
                         if Toggle.Tweening then
                             return
@@ -3339,7 +3300,6 @@ do
                         Library.ChangeObjectTheme(Objects.Background, {
                             BackgroundColor3 = value and 'Accent' or 'Background',
                         }, true)
-                        
                         Library.ChangeObjectTheme(Objects.Text, {
                             TextColor3 = value and 'Text' or 'Dark Text',
                         }, true)
@@ -3356,7 +3316,6 @@ do
                             Library.OnToggleChange(cfg.name, value)
                         end
                     end
-                    
                     function Toggle.Enable()
                         Toggle.Set(not Toggle.Value)
                     end
@@ -3368,7 +3327,6 @@ do
 
                     return setmetatable(Toggle, Library)
                 end
-                
                 function Library.Slider(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -3395,7 +3353,6 @@ do
                         Value = cfg.value,
                         Sliding = false,
                     }
-                    
                     local ZIndex = Slider.ZIndex
                     local Objects = Slider.Objects
 
@@ -3415,7 +3372,6 @@ do
                             Parent = Objects.Holder,
                             PaddingBottom = UDim.new(0, 2),
                         })
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             FillDirection = Enum.FillDirection.Vertical,
@@ -3632,49 +3588,50 @@ do
                         Library.Tween(Objects.Accent, {
                             Size = UDim2.new((Slider.Value - cfg.min) / (cfg.max - cfg.min), 0, 1, 0),
                         })
-                        
                         Library.Tween(Objects.CircleOutline, {
                             Position = UDim2.new((Slider.Value - cfg.min) / (cfg.max - cfg.min), 0, 0.5, 0),
                             AnchorPoint = Vector2.new((Slider.Value - cfg.min) / (cfg.max - cfg.min), 0.5),
                         })
-                        
                         Library.ChangeObjectTheme(Objects.Text, {
                             TextColor3 = value > cfg.min and 'Text' or 'Dark Text',
                         }, true)
-                        
                         Library.ChangeObjectTheme(Objects.Value, {
                             TextColor3 = value > cfg.min and 'Text' or 'Dark Text',
                         }, true)
-                        
                         cfg.callback(Slider.Value)
+
                         Library.Flags[cfg.flag] = Slider.Value
                     end
 
-                    Utility.Signal(Objects.Outline.MouseButton1Down:Connect(function(input)
+                    Utility.Signal(Objects.Outline.MouseButton1Down:Connect(function(
+                        input
+                    )
                         local MouseLocation = UserInputService:GetMouseLocation()
+
                         Slider.Sliding = true
+
                         Slider.Set(((cfg.max - cfg.min) * ((MouseLocation.x - Objects.Outline.AbsolutePosition.x) / Objects.Outline.AbsoluteSize.x)) + cfg.min)
                     end))
-                    
-                    Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                    Utility.Signal(UserInputService.InputEnded:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 and Slider.Sliding then
                             Slider.Sliding = false
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+                    Utility.Signal(UserInputService.InputChanged:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseMovement and Slider.Sliding then
                             Slider.Set(((cfg.max - cfg.min) * ((input.Position.x - Objects.Outline.AbsolutePosition.x) / Objects.Outline.AbsoluteSize.x)) + cfg.min)
                         end
                     end))
-                    
                     Slider.Set(cfg.value)
 
                     Library.ConfigFlags[cfg.flag] = Slider.Set
 
                     return setmetatable(Slider, Library)
                 end
-                
                 function Library.Button(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -3690,7 +3647,6 @@ do
                         Time = 0,
                         Objects = {},
                     }
-                    
                     local ZIndex = Button.ZIndex
                     local Objects = Button.Objects
 
@@ -3733,7 +3689,6 @@ do
                             CornerRadius = UDim.new(0, 5),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingTop = UDim.new(0, 2),
@@ -3758,7 +3713,6 @@ do
                         }, {
                             TextColor3 = 'Dark Text',
                         })
-                        
                         Objects.Text.Size = UDim2.new(cfg.autosize and 0 or 1, cfg.autosize and Objects.Text.TextBounds.X or 0, 0, Objects.Text.TextBounds.Y - 2)
                     end
 
@@ -3768,10 +3722,10 @@ do
                         Button.Clicked = true
                         Button.Time = 5
                         Objects.Text.Text = string.format('Confirm %s? (%s)', cfg.name, Button.Time)
-                        
                         Button.Coroutine = coroutine.create(function()
                             for i = 1, 5 do
                                 task.wait(1)
+
                                 Button.Time = Button.Time - 1
 
                                 if Button.Time > 0 then
@@ -3783,6 +3737,7 @@ do
                                         Library.ChangeObjectTheme(Objects.Text, {
                                             TextColor3 = 'Dark Text',
                                         }, true)
+
                                         Button.Clicked = false
                                     end
 
@@ -3793,7 +3748,6 @@ do
 
                         coroutine.resume(Button.Coroutine)
                     end
-                    
                     function Button.Click()
                         if cfg.confirm then
                             if Button.Clicked then
@@ -3804,6 +3758,7 @@ do
 
                                 Objects.Text.Text = cfg.name
                                 Button.Clicked = false
+
                                 cfg.callback()
                             else
                                 Library.ChangeObjectTheme(Objects.Text, {
@@ -3827,7 +3782,6 @@ do
 
                     return setmetatable(Button, Library)
                 end
-                
                 function Library.List(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -3859,7 +3813,6 @@ do
                         Items = {},
                         Value = nil,
                     }
-                    
                     local ZIndex = List.ZIndex
                     local Objects = List.Objects
 
@@ -4013,7 +3966,6 @@ do
                             CornerRadius = UDim.new(0, 5),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingLeft = UDim.new(0, 5),
@@ -4041,7 +3993,6 @@ do
                         }, {
                             ScrollBarImageColor3 = 'Accent',
                         })
-                        
                         ZIndex = ZIndex + 1
                         Objects.Content = Utility.New('Frame', {
                             Name = 'Content',
@@ -4074,7 +4025,6 @@ do
                                 for _, item in List.Items do
                                     item.Select(false)
                                 end
-                                
                                 for _, item in value do
                                     for _, item2 in List.Items do
                                         if item2.Name == item then
@@ -4084,7 +4034,9 @@ do
                                 end
 
                                 List.Value = value
+
                                 cfg.callback(List.Value)
+
                                 Library.Flags[cfg.flag] = List.Value
                             else
                                 local Index = table.find(List.Value, value)
@@ -4099,6 +4051,7 @@ do
                                     end
 
                                     cfg.callback(List.Value)
+
                                     Library.Flags[cfg.flag] = List.Value
                                 else
                                     table.insert(List.Value, value)
@@ -4110,6 +4063,7 @@ do
                                     end
 
                                     cfg.callback(List.Value)
+
                                     Library.Flags[cfg.flag] = List.Value
                                 end
                             end
@@ -4119,18 +4073,18 @@ do
                             end
 
                             List.Value = value
+
                             cfg.callback(List.Value)
+
                             Library.Flags[cfg.flag] = List.Value
                         end
                     end
-                    
                     function List.Add(name)
                         local Item = {
                             Objects = {},
                             Name = name,
                             Selected = false,
                         }
-                        
                         local Objs = Item.Objects
 
                         do
@@ -4157,17 +4111,18 @@ do
                             Library.ChangeObjectTheme(Objs.Text, {
                                 TextColor3 = value and 'Text' or 'Dark Text',
                             }, true)
+
                             Item.Selected = value
                         end
 
-                        Utility.Signal(Objs.Text.MouseButton1Click:Connect(function()
+                        Utility.Signal(Objs.Text.MouseButton1Click:Connect(function(
+                        )
                             List.Set(name)
                         end))
-                        
                         table.insert(List.Items, Item)
+
                         return Item
                     end
-                    
                     function List.Refresh(tbl)
                         for _, item in List.Items do
                             item.Objects.Text:Destroy()
@@ -4193,7 +4148,6 @@ do
 
                     return setmetatable(List, Library)
                 end
-                
                 function Library.Dropdown(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -4226,7 +4180,6 @@ do
                         Value = nil,
                         ParentPopup = self,
                     }
-                    
                     local ZIndex = self.ZIndex
                     local Objects = Dropdown.Objects
 
@@ -4380,7 +4333,6 @@ do
                             CornerRadius = UDim.new(0, 5),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingLeft = UDim.new(0, 5),
@@ -4455,7 +4407,6 @@ do
                             Parent = Popup.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Popup.Background,
@@ -4483,7 +4434,6 @@ do
                         }, {
                             ScrollBarImageColor3 = 'Accent',
                         })
-                        
                         Popup.Holder = Utility.New('Frame', {
                             Name = 'Holder',
                             Size = UDim2.new(1, 0, 0, 0),
@@ -4505,7 +4455,8 @@ do
 
                     Popup.ZIndex = ZIndex
 
-                    Utility.Signal(Objects.Outline:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+                    Utility.Signal(Objects.Outline:GetPropertyChangedSignal('AbsolutePosition'):Connect(function(
+                    )
                         if Dropdown.Visible then
                             local Size = Objects.Outline.AbsoluteSize
                             local Position = Objects.Outline.AbsolutePosition
@@ -4513,8 +4464,9 @@ do
                             Popup.Outline.Position = UDim2.new(0, Position.X, 0, Position.Y + Size.Y + 5)
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                    Utility.Signal(UserInputService.InputBegan:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 and Dropdown.Visible then
                             if not Utility.MouseOver(Popup.Outline, input) and not Utility.MouseOver(Objects.Outline, input) then
                                 Dropdown.Open()
@@ -4551,7 +4503,6 @@ do
                             end
                         end
                     end
-                    
                     function Dropdown.Size()
                         local Size = 0
                         local Count = 0
@@ -4562,16 +4513,15 @@ do
                             if v:IsA('TextButton') then
                                 Size = Size + v.AbsoluteSize.y + 5
                             end
-                            
                             if Count > 4 then
                                 break
                             end
                         end
 
                         Size = Size + 10
+
                         return Size
                     end
-                    
                     function Dropdown.Open()
                         if Dropdown.Tweening then
                             return
@@ -4585,6 +4535,7 @@ do
                         end
 
                         local ParentObjects = Popup.Outline:GetDescendants()
+
                         table.insert(ParentObjects, Popup.Outline)
 
                         for _, obj in ParentObjects do
@@ -4592,7 +4543,6 @@ do
 
                             if not Index then
                             end
-                            
                             if type(Index) == 'table' then
                                 for _, prop in Index do
                                     Library.Fade(obj, prop, Dropdown.Visible)
@@ -4617,14 +4567,12 @@ do
                             Dropdown.Tweening = false
                         end))
                     end
-                    
                     function Dropdown.Set(value, ignore)
                         if cfg.multi then
                             if type(value) == 'table' then
                                 for _, item in Dropdown.Items do
                                     item.Select(false)
                                 end
-                                
                                 for _, item in value do
                                     for _, item2 in Dropdown.Items do
                                         if item2.Name == item then
@@ -4634,6 +4582,7 @@ do
                                 end
 
                                 Dropdown.Value = value
+
                                 Dropdown.Display()
 
                                 if not ignore then
@@ -4684,6 +4633,7 @@ do
                             end
 
                             Dropdown.Value = type(value) == 'string' and value or nil
+
                             Dropdown.Display()
 
                             if not ignore then
@@ -4693,7 +4643,6 @@ do
                             Library.Flags[cfg.flag] = Dropdown.Value
                         end
                     end
-                    
                     function Dropdown.Add(name)
                         if type(name) ~= 'string' then
                             return
@@ -4704,7 +4653,6 @@ do
                             Name = name,
                             Selected = false,
                         }
-                        
                         local Objects = Item.Objects
 
                         do
@@ -4731,17 +4679,18 @@ do
                             Library.ChangeObjectTheme(Objects.Text, {
                                 TextColor3 = value and 'Text' or 'Dark Text',
                             }, true)
+
                             Item.Selected = value
                         end
 
-                        Utility.Signal(Objects.Text.MouseButton1Click:Connect(function()
+                        Utility.Signal(Objects.Text.MouseButton1Click:Connect(function(
+                        )
                             Dropdown.Set(name)
                         end))
-                        
                         table.insert(Dropdown.Items, Item)
+
                         return Item
                     end
-                    
                     function Dropdown.Refresh(tbl)
                         for _, item in Dropdown.Items do
                             item.Objects.Text:Destroy()
@@ -4764,7 +4713,6 @@ do
                     end
 
                     Dropdown.Set(cfg.value)
-                    
                     Utility.Signal(Objects.Outline.MouseButton1Click:Connect(Dropdown.Open))
 
                     Library.ConfigFlags[cfg.flag] = Dropdown.Set
@@ -4773,7 +4721,6 @@ do
 
                     return setmetatable(Dropdown, Library)
                 end
-                
                 function Library.Colorpicker(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -4792,7 +4739,6 @@ do
                         Value = cfg.value,
                         Alpha = cfg.alpha,
                     }
-                    
                     local ZIndex = Colorpicker.ZIndex
                     local Objects = Colorpicker.Objects
 
@@ -4906,7 +4852,6 @@ do
                         }, {
                             BackgroundColor3 = 'Inline',
                         })
-                        
                         Objects.Outline.Size = UDim2.new(0, Parent.AbsoluteSize.Y, 0, Parent.AbsoluteSize.Y)
 
                         Utility.New('UICorner', {
@@ -4969,38 +4914,41 @@ do
                         })
                     end
 
-                    Utility.Signal(Objects.Outline.MouseButton1Click:Connect(function(input)
+                    Utility.Signal(Objects.Outline.MouseButton1Click:Connect(function(
+                        input
+                    )
                         ColorpickerWindow.Flag = cfg.flag
                         ColorpickerWindow.SetFunc = Colorpicker.Set
+
                         ColorpickerWindow.Set(Colorpicker.Value, Colorpicker.Alpha)
 
                         if ColorpickerWindow.Open then
                             ColorpickerWindow.Open(Objects.Outline.AbsolutePosition + Vector2.new(0, Objects.Outline.AbsoluteSize.Y + 2))
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                    Utility.Signal(UserInputService.InputBegan:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 and ColorpickerWindow.Visible and ColorpickerWindow.Flag == cfg.flag and not (Utility.MouseOver(ColorpickerWindow.Objects.Outline, input) or Utility.MouseOver(Objects.Outline, input)) then
                             if ColorpickerWindow.Open then
                                 ColorpickerWindow.Open(Objects.Outline.AbsolutePosition + Vector2.new(0, Objects.Outline.AbsoluteSize.Y + 2))
                             end
                         end
                     end))
-                    
-                    Utility.Signal(Objects.Outline:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+                    Utility.Signal(Objects.Outline:GetPropertyChangedSignal('AbsolutePosition'):Connect(function(
+                    )
                         if ColorpickerWindow.Visible and ColorpickerWindow.Flag == cfg.flag then
                             local Position = Objects.Outline.AbsolutePosition + Vector2.new(0, Objects.Outline.AbsoluteSize.Y + 2)
+
                             ColorpickerWindow.Objects.Outline.Position = UDim2.new(0, Position.x, 0, Position.y)
                         end
                     end))
-                    
                     Colorpicker.Set(cfg.value, cfg.alpha)
 
                     Library.ConfigFlags[cfg.flag] = Colorpicker.Set
 
                     return setmetatable(Colorpicker, Library)
                 end
-                
                 function Library.Textbox(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -5018,7 +4966,6 @@ do
                         ZIndex = self.ZIndex,
                         Objects = {},
                     }
-                    
                     local ZIndex = Textbox.ZIndex
                     local Objects = Textbox.Objects
 
@@ -5062,7 +5009,6 @@ do
                             CornerRadius = UDim.new(0, 5),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingTop = UDim.new(0, 2),
@@ -5092,7 +5038,6 @@ do
                             TextColor3 = 'Text',
                             PlaceholderColor3 = 'Dark Text',
                         })
-                        
                         Objects.TextBox.Size = UDim2.new(1, 0, 0, Objects.TextBox.TextBounds.Y - 2)
                     end
 
@@ -5101,20 +5046,19 @@ do
                     function Textbox.Set(value)
                         Objects.TextBox.Text = value
                         Library.Flags[cfg.flag] = value
+
                         cfg.callback(value)
                     end
 
                     Utility.Signal(Objects.TextBox.FocusLost:Connect(function()
                         Textbox.Set(Objects.TextBox.Text)
                     end))
-                    
                     Textbox.Set(cfg.value)
 
                     Library.ConfigFlags[cfg.flag] = Textbox.Set
 
                     return setmetatable(Textbox, Library)
                 end
-                
                 function Library.Keybind(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -5142,7 +5086,6 @@ do
                         OnHold = nil,
                         Listener = nil,
                     }
-                    
                     local ZIndex = Keybind.ZIndex
                     local Objects = Keybind.Objects
 
@@ -5254,7 +5197,6 @@ do
                         }, {
                             ImageColor3 = 'Text',
                         })
-                        
                         Objects.Icon.Size = UDim2.new(0, Parent.AbsoluteSize.Y, 0, Parent.AbsoluteSize.Y)
                     end
 
@@ -5302,7 +5244,6 @@ do
                             Parent = Popup.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             Parent = Popup.Background,
@@ -5393,7 +5334,6 @@ do
                         }, {
                             BackgroundColor3 = 'Inline',
                         })
-                        
                         Popup.KeyOutline.Size = UDim2.new(0, 25, 0, Popup.Text.AbsoluteSize.Y)
 
                         Utility.New('UICorner', {
@@ -5466,6 +5406,7 @@ do
                         elseif Type == 'string' then
                             if Keybind.OnHold and value ~= 'Hold' then
                                 Keybind.OnHold:Disconnect()
+
                                 Keybind.OnHold = nil
                             end
 
@@ -5474,14 +5415,13 @@ do
                             if Popup.Dropdown then
                                 Popup.Dropdown.Set(Keybind.Mode, true)
                             end
-                            
                             if value == 'Always' then
                                 Keybind.Value = true
                             end
                         end
-                        
                         if not ignore then
                             Library.Flags[cfg.flag] = Keybind.Value
+
                             cfg.callback(Keybind.Value)
                         end
 
@@ -5521,6 +5461,7 @@ do
                         end
 
                         local ParentObjects = Popup.Outline:GetDescendants()
+
                         table.insert(ParentObjects, Popup.Outline)
 
                         for _, obj in ParentObjects do
@@ -5556,13 +5497,17 @@ do
                         end))
                     end
 
-                    Utility.Signal(Popup.KeyOutline.MouseButton1Click:Connect(function(input)
+                    Utility.Signal(Popup.KeyOutline.MouseButton1Click:Connect(function(
+                        input
+                    )
                         if Keybind.Listener then
                             Library.ChangeObjectTheme(Popup.Key, {
                                 TextColor3 = 'Dark Text',
                             }, true)
                             Keybind.Listener:Disconnect()
+
                             Keybind.Listener = nil
+
                             return
                         end
 
@@ -5571,18 +5516,21 @@ do
                         }, true)
                         task.wait(2E-2)
 
-                        Keybind.Listener = Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                        Keybind.Listener = Utility.Signal(UserInputService.InputBegan:Connect(function(
+                            input
+                        )
                             if input.KeyCode == Enum.KeyCode.Escape or input.KeyCode == Enum.KeyCode.Backspace then
                                 Keybind.Set(Enum.KeyCode.Unknown)
                                 Keybind.Listener:Disconnect()
+
                                 Keybind.Listener = nil
 
                                 Library.ChangeObjectTheme(Popup.Key, {
                                     TextColor3 = 'Dark Text',
                                 }, true)
+
                                 return
                             end
-                            
                             if input.UserInputType == Enum.UserInputType.Keyboard or table.find({
                                 Enum.UserInputType.MouseButton1,
                                 Enum.UserInputType.MouseButton2,
@@ -5595,18 +5543,21 @@ do
                                     TextColor3 = 'Dark Text',
                                 }, true)
                                 Keybind.Listener:Disconnect()
+
                                 Keybind.Listener = nil
                             end
                         end))
                     end))
-                    
-                    Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                    Utility.Signal(UserInputService.InputBegan:Connect(function(
+                        input
+                    )
                         if Keybind.Key ~= Enum.KeyCode.Unknown and (input.KeyCode == Keybind.Key or input.UserInputType == Keybind.Key) then
                             if UserInputService:GetFocusedTextBox() then
                                 return
                             end
 
                             local Value = Keybind.Mode ~= 'Toggle' or not Keybind.Value
+
                             Keybind.Set(Value)
 
                             if Keybind.Mode == 'Hold' then
@@ -5614,12 +5565,15 @@ do
                                     Keybind.OnHold:Disconnect()
                                 end
 
-                                Keybind.OnHold = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+                                Keybind.OnHold = Utility.Signal(UserInputService.InputEnded:Connect(function(
+                                    input
+                                )
                                     if Keybind.Key ~= Enum.KeyCode.Unknown and (input.KeyCode == Keybind.Key or input.UserInputType == Keybind.Key) then
                                         Keybind.Set(false)
 
                                         if Keybind.OnHold then
                                             Keybind.OnHold:Disconnect()
+
                                             Keybind.OnHold = nil
                                         end
                                     end
@@ -5627,21 +5581,21 @@ do
                             end
                         end
                     end))
-                    
-                    Utility.Signal(UserInputService.InputBegan:Connect(function(input)
+                    Utility.Signal(UserInputService.InputBegan:Connect(function(
+                        input
+                    )
                         if input.UserInputType == Enum.UserInputType.MouseButton1 and Keybind.Visible and not (Utility.MouseOver(Popup.Outline, input) or Utility.MouseOver(Objects.Icon, input) or Utility.MouseOver(Popup.Dropdown.Popup.Outline, input)) then
                             if Keybind.Open then
                                 Keybind.Open()
                             end
                         end
                     end))
-                    
-                    Utility.Signal(Objects.Icon.MouseButton1Click:Connect(function()
+                    Utility.Signal(Objects.Icon.MouseButton1Click:Connect(function(
+                    )
                         if Keybind.Open then
                             Keybind.Open()
                         end
                     end))
-                    
                     Keybind.Set({
                         cfg.key,
                         cfg.mode,
@@ -5652,7 +5606,6 @@ do
 
                     return setmetatable(Keybind, Library)
                 end
-                
                 function Library.Label(self, cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -5665,7 +5618,6 @@ do
                         Objects = {},
                         ZIndex = self.ZIndex,
                     }
-                    
                     local ZIndex = Label.ZIndex
                     local Objects = Label.Objects
 
@@ -5746,7 +5698,6 @@ do
 
                     return setmetatable(Label, Library)
                 end
-                
                 function Library.Notification(cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
@@ -5771,7 +5722,6 @@ do
                         ButtonLerp = 1,
                         Lerp = 1,
                     }
-                    
                     local Objects = Notification.Objects
 
                     do
@@ -5832,13 +5782,11 @@ do
                             PaddingBottom = UDim.new(0, 6),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UICorner', {
                             Name = 'UICorner',
                             Parent = Objects.Background,
                             CornerRadius = UDim.new(0, 5),
                         })
-                        
                         Utility.New('UIListLayout', {
                             Name = 'UIListLayout',
                             FillDirection = Enum.FillDirection.Vertical,
@@ -5863,7 +5811,6 @@ do
                         }, {
                             TextColor3 = 'Text',
                         })
-                        
                         ZIndex = ZIndex + 1
 
                         if cfg.buttons then
@@ -5875,7 +5822,6 @@ do
                                 AutomaticSize = Enum.AutomaticSize.XY,
                                 Parent = Objects.Holder,
                             })
-                            
                             Objects.ButtonHolder = Utility.New('Frame', {
                                 Name = 'ButtonHolder',
                                 BorderSizePixel = 0,
@@ -5895,7 +5841,6 @@ do
 
                             ZIndex = ZIndex + 1
                         end
-                        
                         if cfg.description then
                             Objects.Description = Utility.New('TextLabel', {
                                 Name = 'Description',
@@ -5913,10 +5858,8 @@ do
                             }, {
                                 TextColor3 = 'Light Text',
                             })
-                            
                             ZIndex = ZIndex + 1
                         end
-                        
                         if cfg.type == 'Time' then
                             Objects.Time = Utility.New('Frame', {
                                 Name = 'Time',
@@ -5928,7 +5871,6 @@ do
                             }, {
                                 BackgroundColor3 = 'Accent',
                             })
-                            
                             Objects.Time.Size = UDim2.new(0, 0, 0, 2)
                         end
                     end
@@ -5937,23 +5879,18 @@ do
                         Notification.Time = time
                         Notification.Clock = os.clock()
                     end
-                    
                     function Notification.Hide()
                         Notification.Time = 0
                     end
-                    
                     function Notification.Title(text)
                         Objects.Title.Text = text
                     end
-                    
                     function Notification.Description(text)
                         Objects.Description.Text = text
                     end
-                    
                     function Notification.ButtonVisiblity(visibility)
                         Notification.ShowButtons = visibility
                     end
-                    
                     function Notification.CreateButton(bcfg)
                         bcfg = bcfg or {}
                         bcfg = Library.Config(bcfg, {
@@ -5971,6 +5908,7 @@ do
                         })
 
                         table.insert(Notification.Buttons, Button)
+
                         return Button
                     end
 
@@ -5984,11 +5922,10 @@ do
 
                     return Notification
                 end
-                
                 function Library.Watermark(cfg)
                     cfg = cfg or {}
                     cfg = Library.Config(cfg, {
-                        text = 'Library | {game} | {time} | {date}',
+                        text = 'wahwahwah | {game} | {time} | {date}',
                         visible = true,
                         rate = 1.6666666666666665E-2,
                     })
@@ -6002,7 +5939,6 @@ do
                         ZIndex = ZIndex,
                         Clock = os.clock(),
                     }
-                    
                     local Objects = Watermark.Objects
 
                     do
@@ -6041,7 +5977,6 @@ do
                             CornerRadius = UDim.new(0, 5),
                             Parent = Objects.Background,
                         })
-                        
                         Utility.New('UIPadding', {
                             Name = 'UIPadding',
                             PaddingLeft = UDim.new(0, 5),
@@ -6075,15 +6010,12 @@ do
                     function Watermark.SetText(text)
                         Watermark.Text = text
                     end
-                    
                     function Watermark.SetVisible(visibility)
                         Watermark.Visible = visibility
                     end
-                    
                     function Watermark.SetRate(rate)
                         Watermark.Rate = rate
                     end
-                    
                     function Watermark.Think()
                         Objects.Outline.Visible = Watermark.Visible
 
@@ -6098,7 +6030,6 @@ do
 
                     return Watermark
                 end
-                
                 function Library.HandleNotifications(step)
                     Library.Fps = math.floor(1 / step)
 
@@ -6135,7 +6066,6 @@ do
 
                                 if not Index then
                                 end
-                                
                                 if type(Index) == 'table' then
                                     if obj:IsA('TextLabel') then
                                         obj[Index[1] ] = 1 - (notification.ButtonLerp / 255)
@@ -6148,14 +6078,13 @@ do
                                 end
                             end
                         end
-                        
                         if Objects.Description then
                             Objects.Description.TextTransparency = 1 - (Lerp / 255)
                         end
-                        
                         if Objects.Time then
                             Objects.Time.BackgroundTransparency = 1 - (Lerp / 255)
-                            Objects.Time.Size = UDim2.new(0, (Outline.AbsoluteSize.X - 10) * math.clamp(((notification.Clock - Clock) / notification.Time) * -1, 0, 1), 0, 2)
+                            Objects.Time.Size = UDim2.new(0, (Outline.AbsoluteSize.X - 10) * math.clamp(((notification.Clock - Clock) / notification.Time) * 
+-1, 0, 1), 0, 2)
                         end
 
                         Offset = Offset + (Holder.AbsoluteSize.Y + 5) * (Lerp / 255)
@@ -6169,7 +6098,7 @@ do
 
                 Utility.Signal(RunService.RenderStepped:Connect(Library.HandleNotifications))
 
-                local XOR_PASSWORD = '32visionLibrary'
+                local XOR_PASSWORD = '32visionwahwahwah'
 
                 local function xorEncrypt(data, password)
                     local encrypted = ''
@@ -6178,16 +6107,15 @@ do
                     for i = 1, #data do
                         local byte = string.byte(data, i)
                         local keyByte = string.byte(password, ((i - 1) % passLen) + 1)
+
                         encrypted = encrypted .. string.char(bit32.bxor(byte, keyByte))
                     end
 
                     return encrypted
                 end
-                
                 local function xorDecrypt(data, password)
                     return xorEncrypt(data, password)
                 end
-                
                 local function bytesToHex(data)
                     local hex = ''
 
@@ -6197,7 +6125,6 @@ do
 
                     return hex
                 end
-                
                 local function hexToBytes(hex)
                     local data = ''
 
@@ -6235,7 +6162,6 @@ do
 
                     return bytesToHex(encrypted)
                 end
-                
                 function Library.LoadConfig(data)
                     data = hexToBytes(data)
                     data = xorDecrypt(data, XOR_PASSWORD)
@@ -6260,7 +6186,6 @@ do
                                 Config(v)
                             end
                         end
-                        
                         if Library.LoadConfigCallbacks[i] then
                             pcall(function()
                                 Library.LoadConfigCallbacks[i](v)
@@ -6268,13 +6193,13 @@ do
                         end
                     end
                 end
-                
                 function Library.CreateConfigManager(tab, options)
                     if not tab or type(tab) ~= 'table' then
                         return nil
                     end
 
                     options = options or {}
+
                     local side = options.side or 'left'
                     local sectionName = options.name or 'Config Manager'
                     local sectionDesc = options.description or 'Save and load your configurations'
@@ -6290,7 +6215,6 @@ do
                         description = sectionDesc,
                         side = side,
                     })
-                    
                     local configNameTextbox = ConfigSection:Textbox({
                         name = 'Config Name',
                         placeholder = 'Enter config name...',
@@ -6304,13 +6228,15 @@ do
                             for _, file in ipairs(listfiles(folderPath))do
                                 if file:sub(-5) == '.json' then
                                     local configName = file:match('([^/\\]+)%.json$')
+
                                     table.insert(configs, configName)
                                 end
                             end
                         end
-                        
                         if #configs == 0 then
-                            return {'No configs found'}
+                            return {
+                                'No configs found',
+                            }
                         end
 
                         return configs
@@ -6335,7 +6261,6 @@ do
                             if configListDropdown.Refresh and type(configListDropdown.Refresh) == 'function' then
                                 configListDropdown:Refresh(configs)
                             end
-                            
                             if #configs > 0 and configs[1] ~= 'No configs found' then
                                 Library.Flags['ui_selected_config'] = configs[1]
                             else
@@ -6368,11 +6293,9 @@ do
                                 name = 'Config Saved',
                                 description = "Configuration '" .. configName .. "' has been saved.",
                             })
-                            
                             RefreshConfigList()
                         end,
                     })
-                    
                     ConfigSection:Button({
                         name = 'Load Config',
                         description = 'Load selected configuration',
@@ -6384,6 +6307,7 @@ do
                                     name = 'Error',
                                     description = 'No config selected',
                                 })
+
                                 return
                             end
 
@@ -6391,6 +6315,7 @@ do
 
                             if isfile(configPath) then
                                 local data = readfile(configPath)
+
                                 Library.LoadConfig(data)
                                 Library.Notification({
                                     name = 'Config Loaded',
@@ -6404,7 +6329,6 @@ do
                             end
                         end,
                     })
-                    
                     ConfigSection:Button({
                         name = 'Delete Config',
                         description = 'Delete selected configuration',
@@ -6416,6 +6340,7 @@ do
                                     name = 'Error',
                                     description = 'No config selected',
                                 })
+
                                 return
                             end
 
@@ -6436,7 +6361,6 @@ do
                             end
                         end,
                     })
-                    
                     ConfigSection:Button({
                         name = 'Refresh List',
                         description = 'Refresh the config list',
@@ -6454,12 +6378,10 @@ do
                         RefreshList = RefreshConfigList,
                     }
                 end
-                
                 function Library.Unload()
                     for _, obj in Utility.Connections do
                         obj:Disconnect()
                     end
-                    
                     for _, obj in Utility.Objects do
                         obj:Destroy()
                     end
@@ -6472,8 +6394,7 @@ do
                 end)
             end
 
-            Env.Library = Library
-
+            -- CHANGED: Return the library instead of storing it in Env
             return Library
         end
 
@@ -6492,9 +6413,5 @@ do
     end
 end
 
--- Library Main Function
-function Library.new()
-    return __M.c()
-end
-
-return Library.new()
+-- Execute and return the library object
+return __M.c()
