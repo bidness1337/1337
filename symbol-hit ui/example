@@ -1,0 +1,955 @@
+local v = __M.b()
+local lib = __M.c()
+
+local win = lib:Window({
+    name = 'wahwahwah',
+    size = UDim2.fromOffset(750, 550),
+    open = true,
+    fontsize = 20,
+})
+
+lib.Windows = {win}
+lib.Theme.Accent = Color3.fromHex('305261')
+lib.Theme.Text = Color3.fromHex('546d88')
+lib.Theme['Dark Text'] = Color3.fromHex('324250')
+lib.Theme.Background = Color3.fromHex('1b1b1b')
+lib.Theme['Section Background'] = Color3.fromHex('151515')
+lib.Theme['Page Background'] = Color3.fromHex('171717')
+lib.Theme['Light Text'] = Color3.fromHex('676767')
+lib.Theme['Inline'] = Color3.fromHex('313131')
+
+-- Create ALL tabs first
+local ragebot_tab = win:Tab({
+    name = 'ragebot',
+    icon = v.icons.ragebot,
+})
+
+local misc_tab = win:Tab({
+    name = 'misc',
+    icon = v.icons.misc,
+})
+
+local visuals_tab = win:Tab({
+    name = 'visuals',
+    icon = v.icons.visuals,
+})
+
+local settings_tab = win:Tab({
+    name = 'settings',
+    icon = v.icons.settings,
+})
+
+-- Now populate the ragebot tab
+do
+    local general_section = ragebot_tab:Section({
+        name = 'general',
+        description = 'main settings',
+        side = 'left',
+    })
+    
+    local ragebot_toggle = general_section:Toggle({
+        name = 'ragebot',
+        value = false,
+        callback = function(v)
+            lib.Flags.ragebot_enabled = v
+        end,
+        flag = 'ragebot_enabled',
+    })
+    
+    local popup = ragebot_toggle:Popup({size = 200})
+
+    popup:Toggle({
+        name = 'skip ko',
+        value = false,
+        callback = function(v)
+            lib.Flags.skip_ko = v
+        end,
+        flag = 'skip_ko',
+    })
+    
+    popup:Toggle({
+        name = 'skip grabbed',
+        value = false,
+        callback = function(v)
+            lib.Flags.skip_grabbed = v
+        end,
+        flag = 'skip_grabbed',
+    })
+    
+    popup:Toggle({
+        name = 'skip dead',
+        value = false,
+        callback = function(v)
+            lib.Flags.skip_dead = v
+        end,
+        flag = 'skip_dead',
+    })
+    
+    popup:Toggle({
+        name = 'skip forcefield',
+        value = false,
+        callback = function(v)
+            lib.Flags.skip_ff = v
+        end,
+        flag = 'skip_ff',
+    })
+    
+    ragebot_toggle:Keybind({
+        key = Enum.KeyCode.Unknown,
+        mode = 'Toggle',
+        callback = function(v)
+            if not lib.Flags.ragebot_enabled then
+                return
+            end
+            if v then
+                -- Your targeting code here
+            else
+                -- Clear target code here
+            end
+        end,
+        flag = 'ragebot_keybind',
+    })
+
+    local autofire_toggle = general_section:Toggle({
+        name = 'auto fire',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_enabled = v
+        end,
+        flag = 'autofire_enabled',
+    })
+    
+    local autofire_popup = autofire_toggle:Popup({size = 200})
+
+    autofire_popup:Slider({
+        name = 'cooldown',
+        value = 4,
+        min = 1,
+        max = 15,
+        float = 1,
+        suffix = '%s ms',
+        callback = function(v)
+            lib.Flags.autofire_cooldown = v
+        end,
+        flag = 'autofire_cooldown',
+    })
+    
+    autofire_popup:Dropdown({
+        name = 'destination',
+        values = {
+            'Head',
+            'Torso',
+            'LeftArm',
+            'RightArm',
+            'LeftLeg',
+            'RightLeg',
+            'LeftHand',
+            'RightHand',
+            'LeftFoot',
+            'RightFoot',
+            'Neck',
+            'Waist',
+            'LeftUpperArm',
+            'RightUpperArm',
+            'LeftLowerArm',
+            'RightLowerArm',
+            'LeftUpperLeg',
+            'RightUpperLeg',
+            'LeftLowerLeg',
+            'RightLowerLeg',
+        },
+        value = 'Head',
+        callback = function(v)
+            lib.Flags.autofire_destination = v
+        end,
+        flag = 'autofire_destination',
+    })
+    
+    autofire_popup:Dropdown({
+        name = 'origin',
+        values = {
+            'destination',
+            'sway',
+            'upper',
+            'random',
+        },
+        value = 'destination',
+        callback = function(v)
+            lib.Flags.autofire_origin = v
+        end,
+        flag = 'autofire_origin',
+    })
+
+    local checks_toggle = autofire_popup:Toggle({
+        name = 'checks',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_checks = v
+        end,
+        flag = 'autofire_checks',
+    })
+    
+    local checks_popup = checks_toggle:Popup({size = 200})
+
+    checks_popup:Toggle({
+        name = 'check knocked',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_check_ko = v
+        end,
+        flag = 'autofire_check_ko',
+    })
+    
+    checks_popup:Toggle({
+        name = 'check forcefield',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_check_ff = v
+        end,
+        flag = 'autofire_check_ff',
+    })
+    
+    checks_popup:Toggle({
+        name = 'check dead',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_check_dead = v
+        end,
+        flag = 'autofire_check_dead',
+    })
+    
+    checks_popup:Toggle({
+        name = 'check grabbed',
+        value = false,
+        callback = function(v)
+            lib.Flags.autofire_check_grabbed = v
+        end,
+        flag = 'autofire_check_grabbed',
+    })
+    
+    autofire_toggle:Keybind({
+        key = Enum.KeyCode.Unknown,
+        mode = 'Toggle',
+        callback = function(v)
+            autofire_toggle.Set(v)
+        end,
+        flag = 'autofire_keybind',
+    })
+
+    -- NEW SECTION: Aimbot with dropdown and slider - FIXED VERSION
+    local aimbot_section = ragebot_tab:Section({
+        name = 'Aimbot',
+        description = 'Advanced aiming settings',
+        side = 'right',
+    })
+    
+    -- Enabled toggle with keybind
+    local aimbot_enabled_toggle = aimbot_section:Toggle({
+        name = 'Enabled',
+        value = false,
+        callback = function(v)
+            lib.Flags.aimbot_enabled = v
+        end,
+        flag = 'aimbot_enabled',
+    })
+    
+    -- Keybind for the aimbot toggle
+    aimbot_enabled_toggle:Keybind({
+        key = Enum.KeyCode.LeftAlt,
+        mode = 'Toggle',
+        callback = function(v)
+            aimbot_enabled_toggle.Set(v)
+        end,
+        flag = 'aimbot_keybind',
+    })
+    
+    -- Dropdown for target selection
+    local target_dropdown = aimbot_section:Dropdown({
+        name = 'Target Selection',
+        description = 'Choose targeting method',
+        values = {
+            'Closest to Crosshair',
+            'Highest Health',
+            'Lowest Health',
+            'Random',
+            'Priority Target'
+        },
+        value = 'Closest to Crosshair',
+        callback = function(v)
+            lib.Flags.aimbot_target_selection = v
+        end,
+        flag = 'aimbot_target_selection',
+    })
+    
+    -- Slider below the dropdown for target distance
+    aimbot_section:Slider({
+        name = 'Target Distance',
+        value = 100,
+        min = 0,
+        max = 500,
+        float = 1,
+        suffix = '%s studs',
+        callback = function(v)
+            lib.Flags.aimbot_target_distance = v
+        end,
+        flag = 'aimbot_target_distance',
+    })
+    
+    -- Slider for FOV
+    aimbot_section:Slider({
+        name = 'FOV',
+        value = 180,
+        min = 0,
+        max = 360,
+        float = 1,
+        suffix = '%s°',
+        callback = function(v)
+            lib.Flags.aimbot_fov = v
+        end,
+        flag = 'aimbot_fov',
+    })
+    
+    -- Create a toggle for advanced settings instead of direct popup
+    local advanced_settings_toggle = aimbot_section:Toggle({
+        name = 'Advanced Settings',
+        value = false,
+        callback = function(v)
+            lib.Flags.aimbot_advanced_settings = v
+        end,
+        flag = 'aimbot_advanced_settings',
+    })
+    
+    -- Advanced settings as children of the toggle
+    advanced_settings_toggle:Toggle({
+        name = 'Auto Wall',
+        value = false,
+        callback = function(v)
+            lib.Flags.aimbot_auto_wall = v
+        end,
+        flag = 'aimbot_auto_wall',
+    })
+    
+    advanced_settings_toggle:Slider({
+        name = 'Wall Penetration',
+        value = 0.5,
+        min = 0,
+        max = 1,
+        float = 0.1,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.aimbot_wall_pen = v
+        end,
+        flag = 'aimbot_wall_pen',
+    })
+    
+    advanced_settings_toggle:Dropdown({
+        name = 'Hit Priority',
+        values = {
+            'Head',
+            'Torso',
+            'Limbs',
+            'Closest Hitbox'
+        },
+        value = 'Head',
+        callback = function(v)
+            lib.Flags.aimbot_hit_priority = v
+        end,
+        flag = 'aimbot_hit_priority',
+    })
+    
+    advanced_settings_toggle:Toggle({
+        name = 'Visible Check',
+        value = true,
+        callback = function(v)
+            lib.Flags.aimbot_visible_check = v
+        end,
+        flag = 'aimbot_visible_check',
+    })
+    
+    advanced_settings_toggle:Toggle({
+        name = 'Team Check',
+        value = true,
+        callback = function(v)
+            lib.Flags.aimbot_team_check = v
+        end,
+        flag = 'aimbot_team_check',
+    })
+    
+    -- Smoothing slider
+    aimbot_section:Slider({
+        name = 'Smoothing',
+        value = 0.3,
+        min = 0,
+        max = 1,
+        float = 0.1,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.aimbot_smoothing = v
+        end,
+        flag = 'aimbot_smoothing',
+    })
+    
+    -- Prediction slider
+    aimbot_section:Slider({
+        name = 'Prediction',
+        value = 0.2,
+        min = 0,
+        max = 1,
+        float = 0.05,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.aimbot_prediction = v
+        end,
+        flag = 'aimbot_prediction',
+    })
+end
+
+-- Watermark setup
+local watermarkObj = lib.Watermark({
+    text = 'wahwahwah | {fps}',
+    visible = false,
+    rate = 0.2,
+})
+
+watermarkObj.SetRate(0.2)
+
+lib.Flags.watermark_enabled = false
+lib.Flags.watermark_types = {'fps'}
+lib.Flags.watermark_rate = 200
+
+-- Populate the settings tab FIRST (since it might affect initialization)
+do
+    local cs = settings_tab:Section({
+        name = 'configs',
+        description = 'save / load / delete',
+        side = 'left',
+    })
+    
+    local ts = settings_tab:Section({
+        name = 'theme',
+        description = 'customize colors',
+        side = 'right',
+    })
+
+    cs:Textbox({
+        name = 'config name',
+        value = '',
+        placeholder = 'config name...',
+        flag = 'config_name',
+    })
+
+    local cfgPath = 'wahwahwah\\Configs'
+
+    local function getCfgList()
+        local cfg = {}
+
+        if isfolder(cfgPath) then
+            for _, f in pairs(listfiles(cfgPath))do
+                if f:match('%.json$') then
+                    local n = f:match('([^\\/]+)%.json$')
+
+                    if n then
+                        table.insert(cfg, n)
+                    end
+                end
+            end
+        end
+
+        return #cfg > 0 and cfg or {'no configs'}
+    end
+
+    local dd = cs:Dropdown({
+        name = 'configs',
+        values = getCfgList(),
+        value = getCfgList()[1] or 'no configs',
+        callback = function(value) end,
+        flag = 'selected_config',
+    })
+
+    local function cfgOp(op)
+        local flag = (op == 'load' or op == 'del' or op == 'ovr') and 'selected_config' or 'config_name'
+        local nm = lib.Flags[flag]
+
+        if not nm or nm == '' or nm == 'no configs' then
+            return
+        end
+        if not isfolder(cfgPath) then
+            makefolder(cfgPath)
+        end
+
+        local p = cfgPath .. '\\' .. nm .. '.json'
+
+        if op == 'save' or op == 'ovr' then
+            local s, d = pcall(function()
+                return lib.GetConfig()
+            end)
+
+            if s and d then
+                writefile(p, d)
+
+                if dd and dd.Refresh then
+                    dd.Refresh(getCfgList())
+                end
+            end
+        elseif op == 'load' then
+            if isfile(p) then
+                local s, d = pcall(function()
+                    return readfile(p)
+                end)
+
+                if s and d then
+                    pcall(function()
+                        lib.LoadConfig(d)
+                    end)
+                end
+            end
+        elseif op == 'del' then
+            if isfile(p) then
+                pcall(function()
+                    delfile(p)
+                end)
+
+                if dd and dd.Refresh then
+                    dd.Refresh(getCfgList())
+                end
+            end
+        end
+    end
+
+    cs:Button({
+        name = 'save',
+        callback = function()
+            cfgOp('save')
+        end,
+    })
+    
+    cs:Button({
+        name = 'load',
+        callback = function()
+            cfgOp('load')
+        end,
+    })
+    
+    cs:Button({
+        name = 'overwrite',
+        callback = function()
+            cfgOp('ovr')
+        end,
+    })
+    
+    cs:Button({
+        name = 'delete',
+        callback = function()
+            cfgOp('del')
+        end,
+    })
+    
+    cs:Button({
+        name = 'refresh list',
+        callback = function()
+            if dd and dd.Refresh then
+                dd.Refresh(getCfgList())
+            end
+        end,
+    })
+
+    local watermarkToggle = ts:Toggle({
+        name = 'watermark',
+        value = lib.Flags.watermark_enabled,
+        callback = function(v)
+            watermarkObj.SetVisible(v)
+        end,
+        flag = 'watermark_enabled',
+    })
+    
+    local watermarkPopup = watermarkToggle:Popup({size = 200})
+
+    local function updateWatermark()
+        local text = 'wahwahwah'
+        local types = lib.Flags.watermark_types
+
+        if types and #types > 0 then
+            for _, v in ipairs(types)do
+                text = text .. ' | {' .. v .. '}'
+            end
+        end
+
+        watermarkObj.SetText(text)
+    end
+
+    watermarkPopup:Slider({
+        name = 'update rate',
+        value = 200,
+        min = 0,
+        max = 1000,
+        float = 1,
+        suffix = '%s ms',
+        callback = function(v)
+            lib.Flags.watermark_rate = v
+            watermarkObj.SetRate(v / 1000)
+        end,
+        flag = 'watermark_rate',
+    })
+    
+    watermarkPopup:Dropdown({
+        name = 'info types',
+        values = {
+            'fps',
+            'ping',
+            'time',
+            'date',
+            'hour',
+            'minute',
+            'second',
+            'ap',
+            'month',
+            'day',
+            'year',
+            'game',
+            'n',
+        },
+        value = {'fps'},
+        multi = true,
+        callback = function(v)
+            lib.Flags.watermark_types = v
+            updateWatermark()
+        end,
+        flag = 'watermark_types',
+    })
+    
+    ts:Keybind({
+        name = 'menu toggle',
+        key = Enum.KeyCode.RightControl,
+        mode = 'Toggle',
+        callback = function(v)
+            if win and win.Open then
+                win:Open()
+            end
+        end,
+        flag = 'menu_keybind',
+    })
+
+    -- Theme colorpickers
+    for theme, color in pairs(lib.Theme)do
+        ts:Colorpicker({
+            name = theme:lower(),
+            value = color,
+            alpha = 0,
+            callback = function(d)
+                lib.UpdateTheme(theme, d.c)
+            end,
+            flag = 'theme_' .. theme:lower():gsub(' ', '_'),
+        })
+    end
+
+    local gs = settings_tab:Section({
+        name = 'game panel',
+        description = 'usefull utilities',
+        side = 'right',
+    })
+
+    gs:Button({
+        name = 'copy jobid',
+        callback = function()
+            setclipboard(game.JobId)
+        end,
+    })
+    
+    gs:Button({
+        name = 'copy gameid',
+        callback = function()
+            setclipboard(tostring(game.GameId))
+        end,
+    })
+    
+    gs:Button({
+        name = 'copy join script',
+        callback = function()
+            setclipboard('game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ',"' .. game.JobId .. '",game.Players.LocalPlayer)')
+        end,
+    })
+    
+    gs:Button({
+        name = 'rejoin',
+        callback = function()
+            local tps = game:GetService('TeleportService')
+            local lp = game:GetService('Players').LocalPlayer
+            tps:TeleportToPlaceInstance(game.PlaceId, game.JobId, lp)
+        end,
+    })
+    
+    gs:Button({
+        name = 'join new server',
+        callback = function()
+            local min, max = lib.Flags['srv_min'] or 1, lib.Flags['srv_max'] or 15
+            local http = game:GetService('HttpService')
+            local tps = game:GetService('TeleportService')
+            local lp = game:GetService('Players').LocalPlayer
+            
+            local s, d = pcall(function()
+                return http:JSONDecode(game:HttpGetAsync('https://games.roblox.com/v1/games/' .. game.PlaceId .. '/servers/Public?sortOrder=Asc&limit=100'))
+            end)
+
+            if not s then
+                return
+            end
+
+            local valid = {}
+
+            for _, srv in pairs(d.data)do
+                if srv.playing >= min and srv.playing <= max then
+                    table.insert(valid, srv)
+                end
+            end
+
+            if #valid > 0 then
+                tps:TeleportToPlaceInstance(game.PlaceId, valid[math.random(1, #valid)].id, lp)
+            end
+        end,
+    })
+    
+    gs:Slider({
+        name = 'min players',
+        value = 1,
+        min = 1,
+        max = 30,
+        float = 1,
+        callback = function() end,
+        flag = 'srv_min',
+    })
+    
+    gs:Slider({
+        name = 'max players',
+        value = 15,
+        min = 1,
+        max = 30,
+        float = 1,
+        callback = function() end,
+        flag = 'srv_max',
+    })
+end
+
+-- Create sections for misc tab
+do
+    local misc_section_left = misc_tab:Section({
+        name = 'General',
+        description = 'General miscellaneous features',
+        side = 'left',
+    })
+    
+    local misc_section_right = misc_tab:Section({
+        name = 'Movement',
+        description = 'Movement related features',
+        side = 'right',
+    })
+    
+    misc_section_left:Toggle({
+        name = 'Speed Hack',
+        value = false,
+        callback = function(v)
+            lib.Flags.speed_hack = v
+        end,
+        flag = 'speed_hack',
+    })
+    
+    misc_section_left:Slider({
+        name = 'Speed Multiplier',
+        value = 1.5,
+        min = 1,
+        max = 5,
+        float = 0.1,
+        suffix = '%sx',
+        callback = function(v)
+            lib.Flags.speed_multiplier = v
+        end,
+        flag = 'speed_multiplier',
+    })
+    
+    misc_section_left:Toggle({
+        name = 'Jump Hack',
+        value = false,
+        callback = function(v)
+            lib.Flags.jump_hack = v
+        end,
+        flag = 'jump_hack',
+    })
+    
+    misc_section_left:Slider({
+        name = 'Jump Power',
+        value = 50,
+        min = 10,
+        max = 100,
+        float = 1,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.jump_power = v
+        end,
+        flag = 'jump_power',
+    })
+    
+    misc_section_right:Toggle({
+        name = 'Fly',
+        value = false,
+        callback = function(v)
+            lib.Flags.fly_enabled = v
+        end,
+        flag = 'fly_enabled',
+    })
+    
+    misc_section_right:Keybind({
+        name = 'Fly Keybind',
+        key = Enum.KeyCode.F,
+        mode = 'Toggle',
+        callback = function(v)
+            -- You'll need to handle this callback separately
+        end,
+        flag = 'fly_keybind',
+    })
+    
+    misc_section_right:Slider({
+        name = 'Fly Speed',
+        value = 30,
+        min = 10,
+        max = 100,
+        float = 1,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.fly_speed = v
+        end,
+        flag = 'fly_speed',
+    })
+    
+    misc_section_right:Toggle({
+        name = 'Noclip',
+        value = false,
+        callback = function(v)
+            lib.Flags.noclip_enabled = v
+        end,
+        flag = 'noclip_enabled',
+    })
+end
+
+-- Create sections for visuals tab
+do
+    local visuals_section_left = visuals_tab:Section({
+        name = 'ESP',
+        description = 'Player ESP settings',
+        side = 'left',
+    })
+    
+    local visuals_section_right = visuals_tab:Section({
+        name = 'World',
+        description = 'World visual modifications',
+        side = 'right',
+    })
+    
+    visuals_section_left:Toggle({
+        name = 'ESP Enabled',
+        value = false,
+        callback = function(v)
+            lib.Flags.esp_enabled = v
+        end,
+        flag = 'esp_enabled',
+    })
+    
+    visuals_section_left:Toggle({
+        name = 'Show Names',
+        value = true,
+        callback = function(v)
+            lib.Flags.esp_names = v
+        end,
+        flag = 'esp_names',
+    })
+    
+    visuals_section_left:Toggle({
+        name = 'Show Health',
+        value = true,
+        callback = function(v)
+            lib.Flags.esp_health = v
+        end,
+        flag = 'esp_health',
+    })
+    
+    visuals_section_left:Toggle({
+        name = 'Show Distance',
+        value = true,
+        callback = function(v)
+            lib.Flags.esp_distance = v
+        end,
+        flag = 'esp_distance',
+    })
+    
+    visuals_section_left:Colorpicker({
+        name = 'Team Color',
+        value = Color3.fromRGB(0, 255, 0),
+        alpha = 0,
+        callback = function(d)
+            lib.Flags.esp_team_color = d.c
+        end,
+        flag = 'esp_team_color',
+    })
+    
+    visuals_section_left:Colorpicker({
+        name = 'Enemy Color',
+        value = Color3.fromRGB(255, 0, 0),
+        alpha = 0,
+        callback = function(d)
+            lib.Flags.esp_enemy_color = d.c
+        end,
+        flag = 'esp_enemy_color',
+    })
+    
+    visuals_section_right:Toggle({
+        name = 'Fullbright',
+        value = false,
+        callback = function(v)
+            lib.Flags.fullbright_enabled = v
+        end,
+        flag = 'fullbright_enabled',
+    })
+    
+    visuals_section_right:Toggle({
+        name = 'Chams',
+        value = false,
+        callback = function(v)
+            lib.Flags.chams_enabled = v
+        end,
+        flag = 'chams_enabled',
+    })
+    
+    visuals_section_right:Slider({
+        name = 'Chams Transparency',
+        value = 0.5,
+        min = 0,
+        max = 1,
+        float = 0.1,
+        suffix = '%s',
+        callback = function(v)
+            lib.Flags.chams_transparency = v
+        end,
+        flag = 'chams_transparency',
+    })
+    
+    visuals_section_right:Colorpicker({
+        name = 'Chams Color',
+        value = Color3.fromRGB(255, 255, 0),
+        alpha = 0.5,
+        callback = function(d)
+            lib.Flags.chams_color = d.c
+        end,
+        flag = 'chams_color',
+    })
+end
+
+-- Set the ragebot tab as active by default
+ragebot_tab.Set(true)
+
+-- Add a slight delay to ensure everything is loaded
+task.wait(0.1)
+
+lib.Notification({
+    name = 'wahwahwah',
+    description = 'UI loaded successfully!',
+    type = 'Time',
+    time = 5,
+})
