@@ -96,10 +96,10 @@ do
         end
 
         cache.icons = {
-            ragebot = 'rbxassetid://10734934585',
-            misc = 'rbxassetid://10709811939',
-            visuals = 'rbxassetid://10723346959',
-            settings = 'rbxassetid://10734950309',
+            --ragebot = 'rbxassetid://10734934585',
+           --misc = 'rbxassetid://10709811939',
+            --visuals = 'rbxassetid://10723346959',
+            --settings = 'rbxassetid://10734950309',
         }
 
         return cache
