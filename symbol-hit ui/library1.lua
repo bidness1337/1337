@@ -6398,9 +6398,9 @@ local Library = (function()
             Library.Unload()
         end)
     end
+    getgenv().Library = Library
+
+    return Library
 end)()
 
-getgenv().Library = Library
-
-return Library
 
