@@ -1,3 +1,7 @@
+-- modiified it a lil bit so it can actually be a library and since 32vision just modified lumora or wtv the real name of the gui was
+
+
+
 local LoadingTick = os.clock()
 if getgenv().Library then
     getgenv().Library:Unload()
