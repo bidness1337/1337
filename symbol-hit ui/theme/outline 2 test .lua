@@ -1724,7 +1724,7 @@ local Library = (function()
 
         ZIndex = ZIndex + 1
         
-        -- Left sidebar outline - This will go full height
+        -- Left sidebar outline - This will go full height and be visible at bottom
         Objects.SideOutline = Utility.New('Frame', {
             Name = 'SideOutline',
             Size = UDim2.new(0, 162, 1, 0), -- Full height of the window
@@ -1732,7 +1732,7 @@ local Library = (function()
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
-            ClipsDescendants = true,
+            ClipsDescendants = false, -- CHANGE THIS TO FALSE to not clip the bottom
         }, {
             BackgroundColor3 = 'Inline', -- This creates the outline color
         })
@@ -1753,6 +1753,7 @@ local Library = (function()
             BorderSizePixel = 0,
             Parent = Objects.SideOutline,
             ZIndex = ZIndex,
+            ClipsDescendants = true,
         }, {
             BackgroundColor3 = 'Inline',
         })
@@ -1809,7 +1810,7 @@ local Library = (function()
             Parent = Objects.SideBackground,
             ZIndex = ZIndex,
         }, {
-            TextColor3 = 'Accent', -- Window title now uses accent color permanently
+            TextColor3 = 'Accent',
         })
         Objects.Title.Size = UDim2.new(1, 0, 0, Objects.Title.TextBounds.Y + 22)
         
@@ -1893,6 +1894,7 @@ local Library = (function()
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
+            ClipsDescendants = true,
         })
 
         Utility.New('UIPadding', {
@@ -1910,6 +1912,7 @@ local Library = (function()
 
     Window.ZIndex = ZIndex
 
+    -- Rest of the function remains the same...
     local AnimationSizeAmount = 20
 
     function Window.Open()
