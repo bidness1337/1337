@@ -1724,31 +1724,34 @@ local Library = (function()
 
         ZIndex = ZIndex + 1
         
-        -- Left sidebar
-        Objects.SideInline = Utility.New('Frame', {
-            Name = 'SideInline',
-            Size = UDim2.new(0, 160, 1, 0),
+        -- Sidebar Container with full outline
+        Objects.SideContainer = Utility.New('Frame', {
+            Name = 'SideContainer',
+            Size = UDim2.new(0, 162, 1, 0),
             Position = UDim2.fromOffset(0, 0),
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
+            ClipsDescendants = true,
         }, {
-            BackgroundColor3 = 'Inline',
+            BackgroundColor3 = 'Inline', -- This is the outline color
         })
 
         Utility.New('UICorner', {
             Name = 'UICorner',
-            Parent = Objects.SideInline,
+            Parent = Objects.SideContainer,
             CornerRadius = UDim.new(0, 5),
         })
 
         ZIndex = ZIndex + 1
+        
+        -- Sidebar Background (inside the outline)
         Objects.SideBackground = Utility.New('Frame', {
             Name = 'SideBackground',
-            Size = UDim2.new(1, -1, 1, 0),
-            Position = UDim2.fromOffset(0, 0),
+            Size = UDim2.new(1, -2, 1, -2),
+            Position = UDim2.new(0, 1, 0, 1),
             BorderSizePixel = 0,
-            Parent = Objects.SideInline,
+            Parent = Objects.SideContainer,
             ZIndex = ZIndex,
             ClipsDescendants = true,
         }, {
@@ -1760,20 +1763,10 @@ local Library = (function()
             Parent = Objects.SideBackground,
             CornerRadius = UDim.new(0, 5),
         })
+        
         Library.Dragging(Objects.Outline, Objects.SideBackground)
         
-        -- Add bottom outline to the sidebar
-        Objects.BottomOutline = Utility.New('Frame', {
-            Name = 'BottomOutline',
-            Size = UDim2.new(1, 0, 0, 1),
-            Position = UDim2.new(0, 0, 1, -1),
-            BorderSizePixel = 0,
-            Parent = Objects.SideBackground,
-            ZIndex = ZIndex + 1,
-        }, {
-            BackgroundColor3 = 'Inline',
-        })
-        
+        -- Add padding inside the sidebar
         Utility.New('UIPadding', {
             Name = 'UIPadding',
             PaddingLeft = UDim.new(0, 5),
@@ -1800,6 +1793,7 @@ local Library = (function()
             TextColor3 = 'Accent',
         })
         Objects.Title.Size = UDim2.new(1, 0, 0, Objects.Title.TextBounds.Y + 22)
+        
         Objects.SideScroll = Utility.New('ScrollingFrame', {
             Name = 'SideScroll',
             Size = UDim2.new(1, 0, 1, -Objects.Title.AbsoluteSize.Y),
@@ -1817,6 +1811,7 @@ local Library = (function()
         }, {
             ScrollBarImageColor3 = 'Accent',
         })
+        
         Objects.SideContent = Utility.New('Frame', {
             Name = 'SideContent',
             Size = UDim2.new(1, 0, 0, 0),
@@ -1828,22 +1823,22 @@ local Library = (function()
             ZIndex = ZIndex,
         })
 
-        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function(
-        )
+        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
             else
                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
             end
         end))
-        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function(
-        )
+        
+        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
             else
                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
             end
         end))
+        
         Utility.New('UIListLayout', {
             Name = 'UIListLayout',
             FillDirection = Enum.FillDirection.Vertical,
@@ -1853,6 +1848,7 @@ local Library = (function()
         })
 
         Window.SideHolder = Objects.SideContent
+        
         Objects.ResizeBar = Utility.New('Frame', {
             Name = 'ResizeBar',
             BorderSizePixel = 0,
@@ -1867,8 +1863,8 @@ local Library = (function()
 
         Objects.PageHolder = Utility.New('Frame', {
             Name = 'PageHolder',
-            Size = UDim2.new(1, -Objects.SideInline.AbsoluteSize.X, 1, 0),
-            Position = UDim2.new(0, Objects.SideInline.AbsoluteSize.X, 0, 0),
+            Size = UDim2.new(1, -Objects.SideContainer.AbsoluteSize.X, 1, 0),
+            Position = UDim2.new(0, Objects.SideContainer.AbsoluteSize.X, 0, 0),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
             Parent = Objects.Outline,
