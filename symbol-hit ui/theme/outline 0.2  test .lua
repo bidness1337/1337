@@ -1676,7 +1676,6 @@ local Library = (function()
             Library.ColorpickerWindow = ColorpickerWindowFunc({ZIndex = 5000})
         end
 
-
         function Library.Window(self, cfg)
     cfg = cfg or {}
     cfg = Library.Config(cfg, {
@@ -1725,36 +1724,14 @@ local Library = (function()
 
         ZIndex = ZIndex + 1
         
-        -- Left sidebar outline - This will go full height and be visible at bottom
-        Objects.SideOutline = Utility.New('Frame', {
-            Name = 'SideOutline',
-            Size = UDim2.new(0, 162, 1, 0), -- Full height of the window
+        -- Left sidebar
+        Objects.SideInline = Utility.New('Frame', {
+            Name = 'SideInline',
+            Size = UDim2.new(0, 160, 1, 0),
             Position = UDim2.fromOffset(0, 0),
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
-            ClipsDescendants = false,
-        }, {
-            BackgroundColor3 = 'Inline', -- This creates the outline color
-        })
-
-        Utility.New('UICorner', {
-            Name = 'UICorner',
-            Parent = Objects.SideOutline,
-            CornerRadius = UDim.new(0, 5),
-        })
-
-        ZIndex = ZIndex + 1
-        
-        -- Side background (inner) - This also goes full height
-        Objects.SideInline = Utility.New('Frame', {
-            Name = 'SideInline',
-            Size = UDim2.new(1, -2, 1, -2),
-            Position = UDim2.new(0, 1, 0, 1),
-            BorderSizePixel = 0,
-            Parent = Objects.SideOutline,
-            ZIndex = ZIndex,
-            ClipsDescendants = true,
         }, {
             BackgroundColor3 = 'Inline',
         })
@@ -1766,8 +1743,6 @@ local Library = (function()
         })
 
         ZIndex = ZIndex + 1
-        
-        -- Side background (main content area) - This also goes full height
         Objects.SideBackground = Utility.New('Frame', {
             Name = 'SideBackground',
             Size = UDim2.new(1, -1, 1, 0),
@@ -1787,15 +1762,25 @@ local Library = (function()
         })
         Library.Dragging(Objects.Outline, Objects.SideBackground)
         
-        -- Create a container that will hold all sidebar content and stretch full height
-        Objects.SideContainer = Utility.New('Frame', {
-            Name = 'SideContainer',
-            Size = UDim2.new(1, 0, 1, 0),
-            Position = UDim2.fromOffset(0, 0),
-            BackgroundTransparency = 1,
+        -- Add bottom outline to the sidebar
+        Objects.BottomOutline = Utility.New('Frame', {
+            Name = 'BottomOutline',
+            Size = UDim2.new(1, 0, 0, 1),
+            Position = UDim2.new(0, 0, 1, -1),
             BorderSizePixel = 0,
             Parent = Objects.SideBackground,
-            ZIndex = ZIndex,
+            ZIndex = ZIndex + 1,
+        }, {
+            BackgroundColor3 = 'Inline',
+        })
+        
+        Utility.New('UIPadding', {
+            Name = 'UIPadding',
+            PaddingLeft = UDim.new(0, 5),
+            PaddingRight = UDim.new(0, 5),
+            PaddingTop = UDim.new(0, 8),
+            PaddingBottom = UDim.new(0, 5),
+            Parent = Objects.SideBackground,
         })
 
         ZIndex = ZIndex + 1
@@ -1809,21 +1794,19 @@ local Library = (function()
             Size = UDim2.new(1, 0, 0, 0),
             Position = UDim2.new(0, 0, 0, 0),
             Text = cfg.name,
-            Parent = Objects.SideContainer,
+            Parent = Objects.SideBackground,
             ZIndex = ZIndex,
         }, {
             TextColor3 = 'Accent',
         })
         Objects.Title.Size = UDim2.new(1, 0, 0, Objects.Title.TextBounds.Y + 22)
-        
-        -- Scrolling frame for sidebar content - this will take remaining space
         Objects.SideScroll = Utility.New('ScrollingFrame', {
             Name = 'SideScroll',
             Size = UDim2.new(1, 0, 1, -Objects.Title.AbsoluteSize.Y),
             Position = UDim2.fromOffset(0, Objects.Title.AbsoluteSize.Y),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Parent = Objects.SideContainer,
+            Parent = Objects.SideBackground,
             ZIndex = ZIndex,
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
@@ -1831,12 +1814,9 @@ local Library = (function()
             MidImage = Library.ScrollBar,
             TopImage = Library.ScrollBar,
             ScrollBarThickness = 2,
-            ScrollBarImageTransparency = 0,
         }, {
             ScrollBarImageColor3 = 'Accent',
         })
-        
-        -- Content holder inside scroll frame
         Objects.SideContent = Utility.New('Frame', {
             Name = 'SideContent',
             Size = UDim2.new(1, 0, 0, 0),
@@ -1848,24 +1828,22 @@ local Library = (function()
             ZIndex = ZIndex,
         })
 
-        -- Adjust content width when scrollbar appears
-        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
+        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function(
+        )
             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
             else
                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
             end
         end))
-        
-        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+        Utility.Signal(Objects.SideScroll:GetPropertyChangedSignal('AbsoluteSize'):Connect(function(
+        )
             if Objects.SideScroll.AbsoluteCanvasSize.Y > Objects.SideScroll.AbsoluteSize.Y then
                 Objects.SideContent.Size = UDim2.new(1, -7, 0, 0)
             else
                 Objects.SideContent.Size = UDim2.new(1, 0, 0, 0)
             end
         end))
-        
-        -- Layout for sidebar content
         Utility.New('UIListLayout', {
             Name = 'UIListLayout',
             FillDirection = Enum.FillDirection.Vertical,
@@ -1887,16 +1865,14 @@ local Library = (function()
 
         Library.Resize(Objects.Outline, Objects.ResizeBar)
 
-        -- Page holder for tab content
         Objects.PageHolder = Utility.New('Frame', {
             Name = 'PageHolder',
-            Size = UDim2.new(1, -Objects.SideOutline.AbsoluteSize.X, 1, 0),
-            Position = UDim2.new(0, Objects.SideOutline.AbsoluteSize.X, 0, 0),
+            Size = UDim2.new(1, -Objects.SideInline.AbsoluteSize.X, 1, 0),
+            Position = UDim2.new(0, Objects.SideInline.AbsoluteSize.X, 0, 0),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
-            ClipsDescendants = true,
         })
 
         Utility.New('UIPadding', {
