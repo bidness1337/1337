@@ -1676,6 +1676,7 @@ local Library = (function()
             Library.ColorpickerWindow = ColorpickerWindowFunc({ZIndex = 5000})
         end
 
+
         function Library.Window(self, cfg)
     cfg = cfg or {}
     cfg = Library.Config(cfg, {
@@ -1732,7 +1733,7 @@ local Library = (function()
             BorderSizePixel = 0,
             Parent = Objects.Outline,
             ZIndex = ZIndex,
-            ClipsDescendants = false, -- CHANGE THIS TO FALSE to not clip the bottom
+            ClipsDescendants = false,
         }, {
             BackgroundColor3 = 'Inline', -- This creates the outline color
         })
@@ -1786,14 +1787,15 @@ local Library = (function()
         })
         Library.Dragging(Objects.Outline, Objects.SideBackground)
         
-        -- Add padding inside the sidebar
-        Utility.New('UIPadding', {
-            Name = 'UIPadding',
-            PaddingLeft = UDim.new(0, 5),
-            PaddingRight = UDim.new(0, 5),
-            PaddingTop = UDim.new(0, 8),
-            PaddingBottom = UDim.new(0, 5),
+        -- Create a container that will hold all sidebar content and stretch full height
+        Objects.SideContainer = Utility.New('Frame', {
+            Name = 'SideContainer',
+            Size = UDim2.new(1, 0, 1, 0),
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
             Parent = Objects.SideBackground,
+            ZIndex = ZIndex,
         })
 
         ZIndex = ZIndex + 1
@@ -1807,21 +1809,21 @@ local Library = (function()
             Size = UDim2.new(1, 0, 0, 0),
             Position = UDim2.new(0, 0, 0, 0),
             Text = cfg.name,
-            Parent = Objects.SideBackground,
+            Parent = Objects.SideContainer,
             ZIndex = ZIndex,
         }, {
             TextColor3 = 'Accent',
         })
         Objects.Title.Size = UDim2.new(1, 0, 0, Objects.Title.TextBounds.Y + 22)
         
-        -- Scrolling frame for sidebar content
+        -- Scrolling frame for sidebar content - this will take remaining space
         Objects.SideScroll = Utility.New('ScrollingFrame', {
             Name = 'SideScroll',
             Size = UDim2.new(1, 0, 1, -Objects.Title.AbsoluteSize.Y),
             Position = UDim2.fromOffset(0, Objects.Title.AbsoluteSize.Y),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Parent = Objects.SideBackground,
+            Parent = Objects.SideContainer,
             ZIndex = ZIndex,
             AutomaticCanvasSize = Enum.AutomaticSize.Y,
             CanvasSize = UDim2.new(0, 0, 0, 0),
@@ -1912,7 +1914,6 @@ local Library = (function()
 
     Window.ZIndex = ZIndex
 
-    -- Rest of the function remains the same...
     local AnimationSizeAmount = 20
 
     function Window.Open()
