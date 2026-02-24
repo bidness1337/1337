@@ -2250,6 +2250,7 @@ end
             return setmetatable(Tab, Library)
         end
         
+
         function Library.Section(self, cfg)
     cfg = cfg or {}
     cfg = Library.Config(cfg, {
@@ -2317,51 +2318,35 @@ end
         
         ZIndex = ZIndex + 1
         
-        -- Top accent line container
+        -- Dragging handle at the top
+        Objects.Dragging = Utility.New('TextButton', {
+            Name = 'Dragging',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 5),
+            Position = UDim2.new(0, 0, 0, 0),
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Top accent line (full width, sits behind the text)
         Objects.TopAccentLine = Utility.New('Frame', {
             Name = 'TopAccentLine',
             BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 2), -- 2 pixel height accent line
-            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, -12, 0, 2), -- Full width with padding on sides
+            Position = UDim2.new(0, 6, 0, 8), -- Positioned where the text will sit
             Parent = Objects.Outline,
             ZIndex = ZIndex,
         }, {
-            BackgroundColor3 = 'Accent', -- Accent color
+            BackgroundColor3 = 'Accent',
         })
 
-        -- Container for the section name that sits on top of the accent line
-        Objects.NameContainer = Utility.New('Frame', {
-            Name = 'NameContainer',
-            BorderSizePixel = 0,
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 8, 0, -1), -- Position it slightly overlapping the accent line
-            Parent = Objects.Outline,
-            ZIndex = ZIndex + 1,
-            AutomaticSize = Enum.AutomaticSize.XY,
-        })
-
-        -- Background for the name (to cover the accent line behind it)
-        Objects.NameBackground = Utility.New('Frame', {
-            Name = 'NameBackground',
-            BorderSizePixel = 0,
-            Size = UDim2.new(1, 4, 1, 0), -- Slightly wider than text
-            Position = UDim2.new(0, -2, 0, 0), -- Center the background behind text
-            Parent = Objects.NameContainer,
-            ZIndex = ZIndex + 1,
-        }, {
-            BackgroundColor3 = 'Section Background', -- Match section background to "cut" the accent line
-        })
-
-        Utility.New('UICorner', {
-            Name = 'UICorner',
-            Parent = Objects.NameBackground,
-            CornerRadius = UDim.new(0, 3),
-        })
-
-        ZIndex = ZIndex + 2
-        
-        -- Section title (in accent color)
+        -- Section title (positioned directly on the accent line)
         Objects.Title = Utility.New('TextLabel', {
             Name = 'Title',
             TextStrokeTransparency = 0.8,
@@ -2369,22 +2354,22 @@ end
             TextSize = Library.FontSize,
             FontFace = Library.Font,
             Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 0, 0, 0),
             Text = cfg.name,
             AutomaticSize = Enum.AutomaticSize.XY,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = Objects.NameContainer,
-            ZIndex = ZIndex,
+            Parent = Objects.Outline,
+            ZIndex = ZIndex + 1,
         }, {
-            TextColor3 = 'Accent', -- Always accent color
+            TextColor3 = 'Accent', -- Accent color for the text
         })
 
-        -- Calculate and set the size of the name container based on text width
-        local textWidth = Objects.Title.TextBounds.X
-        Objects.NameContainer.Size = UDim2.new(0, textWidth + 8, 0, Objects.Title.TextBounds.Y)
-        
-        ZIndex = ZIndex + 1
+        -- Calculate text height for proper positioning (center text on the accent line)
+        local textHeight = Objects.Title.TextBounds.Y
+        Objects.Title.Position = UDim2.new(0, 12, 0, 8 - (textHeight / 2) + 1) -- Center text on the accent line
 
+        ZIndex = ZIndex + 2
+
+        -- Description (if provided) - positioned below the title
         if cfg.description then
             Objects.Description = Utility.New('TextLabel', {
                 Name = 'Description',
@@ -2392,8 +2377,8 @@ end
                 BackgroundTransparency = 1,
                 TextSize = Library.FontSize - 2,
                 FontFace = Library.Font,
-                Size = UDim2.new(1, -16, 0, 0), -- Add padding to avoid accent line
-                Position = UDim2.new(0, 8, 0, 12), -- Position below the accent line and title
+                Size = UDim2.new(1, -24, 0, 0),
+                Position = UDim2.new(0, 12, 0, 20), -- Positioned below the title
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Text = cfg.description,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -2406,15 +2391,15 @@ end
             ZIndex = ZIndex + 1
         end
 
-        -- Content area (positioned below the accent line and description)
-        local topOffset = 12 + (cfg.description and Objects.Description.TextBounds.Y + 4 or 0)
+        -- Content area (this is where all the toggles, buttons, etc. go)
+        local contentTopOffset = cfg.description and 45 or 30 -- Offset based on whether there's a description
         
         Objects.Padded = Utility.New('Frame', {
             Name = 'Padded',
             BorderSizePixel = 0,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, -12, 1, -(topOffset + 6)),
-            Position = UDim2.new(0, 6, 0, topOffset + 6),
+            Size = UDim2.new(1, -12, 1, -(contentTopOffset + 6)),
+            Position = UDim2.new(0, 6, 0, contentTopOffset),
             Parent = Objects.Outline,
             ZIndex = ZIndex,
         })
@@ -2463,7 +2448,7 @@ end
 
         ZIndex = ZIndex + 1
 
-        -- Handle canvas size updates
+        -- Handle canvas size updates for scrollbar
         Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
             if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
                 Objects.Content.Size = UDim2.new(1, -7, 0, 0)
@@ -2480,6 +2465,7 @@ end
             end
         end))
 
+        -- Resize bar at the bottom
         Objects.ResizeBar = Utility.New('TextButton', {
             Name = 'ResizeBar',
             BorderSizePixel = 0,
@@ -2507,9 +2493,8 @@ end
 
             Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.MainOutline.AbsolutePosition.Y, 25, 9e9))
         end))
-        local ResizeStop
-
-        ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+        
+        local ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 Section.Resizing = false
 
@@ -2521,12 +2506,12 @@ end
 
     Section.OldParent = Objects.MainOutline.Parent
 
-    -- Dragging functionality (if needed)
-    Utility.Signal(Objects.NameContainer.MouseButton1Down:Connect(function()
+    -- Dragging functionality (moved to the dragging handle at the top)
+    Utility.Signal(Objects.Dragging.MouseButton1Down:Connect(function()
         Section.Dragging = true
 
         local MousePosition = UserInputService:GetMouseLocation()
-        local Offset = Vector2.new(MousePosition.X - Objects.NameContainer.AbsolutePosition.X, MousePosition.Y - Objects.NameContainer.AbsolutePosition.Y)
+        local Offset = Vector2.new(MousePosition.X - Objects.Dragging.AbsolutePosition.X, MousePosition.Y - Objects.Dragging.AbsolutePosition.Y)
 
         Objects.MainOutline.Size = UDim2.new(0, Objects.MainOutline.AbsoluteSize.X, 0, Objects.MainOutline.AbsoluteSize.Y)
         Objects.MainOutline.Position = UDim2.new(0, Objects.MainOutline.AbsolutePosition.X, 0, Objects.MainOutline.AbsolutePosition.Y)
@@ -2601,9 +2586,7 @@ end
             end
         end))
         
-        local DragStop
-
-        DragStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+        local DragStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 Section.Dragging = false
 
