@@ -2505,6 +2505,256 @@ function Library.Tab(self, cfg)
     return setmetatable(Tab, Library)
 end
 
+function Library.Tab(self, cfg)
+    cfg = cfg or {}
+    cfg = Library.Config(cfg, {
+        name = 'New Tab',
+        icon = 'rbxassetid://284402752',
+    })
+
+    local Tab = {
+        ZIndex = self.ZIndex,
+        Tweening = false,
+        Objects = {},
+        Sections = {},
+        Name = cfg.name,
+    }
+    local ZIndex = Tab.ZIndex
+    local Objects = Tab.Objects
+
+    do
+        Objects.Holder = Utility.New('Frame', {
+            Name = 'Holder',
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Parent = self.SideHolder,
+            ZIndex = ZIndex,
+        })
+        ZIndex = ZIndex + 1
+        
+        -- Tab button outline
+        Objects.MainOutline = Utility.New('Frame', {
+            Name = 'MainOutline',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Parent = Objects.Holder,
+            ZIndex = ZIndex,
+        }, {
+            BackgroundColor3 = 'Inline',
+        })
+        
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.MainOutline,
+            CornerRadius = UDim.new(0, 5),
+        })
+        
+        ZIndex = ZIndex + 1
+        Objects.Background = Utility.New('TextButton', {
+            Name = 'Background',
+            Size = UDim2.new(1, -2, 1, -2),
+            Position = UDim2.new(0, 1, 0, 1),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Text = '',
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Parent = Objects.MainOutline,
+            ZIndex = ZIndex,
+            ClipsDescendants = true,
+        }, {
+            BackgroundColor3 = 'Background',
+        })
+        ZIndex = ZIndex + 1
+
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.Background,
+            CornerRadius = UDim.new(0, 5),
+        })
+        Utility.New('UIPadding', {
+            Name = 'UIPadding',
+            Parent = Objects.Background,
+            PaddingLeft = UDim.new(0, 8),
+            PaddingRight = UDim.new(0, 8),
+            PaddingTop = UDim.new(0, 6),
+            PaddingBottom = UDim.new(0, 6),
+        })
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            Parent = Objects.Background,
+            FillDirection = Enum.FillDirection.Horizontal,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 7),
+        })
+
+        if cfg.icon then
+            Objects.Icon = Utility.New('ImageLabel', {
+                Name = 'Icon',
+                Size = UDim2.new(0, 20, 0, 20),
+                Position = UDim2.new(0, 0, 0, 0),
+                AutomaticSize = Enum.AutomaticSize.XY,
+                BackgroundTransparency = 1,
+                Image = cfg.icon,
+                Parent = Objects.Background,
+                ZIndex = ZIndex,
+            }, {
+                ImageColor3 = 'Dark Text',
+            })
+        end
+
+        Objects.Text = Utility.New('TextLabel', {
+            Name = 'Text',
+            TextStrokeTransparency = 0.8,
+            BackgroundTransparency = 1,
+            TextSize = Library.FontSize,
+            FontFace = Library.Font,
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Text = cfg.name,
+            Parent = Objects.Background,
+            ZIndex = ZIndex,
+        }, {
+            TextColor3 = 'Dark Text',
+        })
+        Objects.Text.Size = UDim2.new(0, Objects.Text.TextBounds.X, 0, Objects.Text.TextBounds.Y - 2)
+
+        if Objects.Icon then
+            Objects.Icon.Size = UDim2.new(0, Objects.Text.TextBounds.Y, 0, Objects.Text.TextBounds.Y)
+        end
+
+        Objects.Page = Utility.New('Frame', {
+            Name = 'Page',
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = self.PageHolder,
+            Visible = false,
+            ZIndex = ZIndex,
+        })
+        ZIndex = ZIndex + 1
+        
+        -- Left side container with increased spacing
+        Objects.Left = Utility.New('Frame', {
+            Name = 'Left',
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Size = UDim2.new(0.5, -2, 1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = Objects.Page,
+            ZIndex = ZIndex,
+        })
+
+        table.insert(Tab.Sections, Objects.Left)
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            Parent = Objects.Left,
+            FillDirection = Enum.FillDirection.Vertical,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            VerticalFlex = Enum.UIFlexAlignment.Fill,
+            Padding = UDim.new(0, 8), -- Increased spacing between sections
+        })
+
+        Tab.left = Objects.Left
+        
+        -- Right side container with increased spacing
+        Objects.Right = Utility.New('Frame', {
+            Name = 'Right',
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Size = UDim2.new(0.5, -2, 1, 0),
+            Position = UDim2.new(0.5, 2, 0, 0),
+            Parent = Objects.Page,
+            ZIndex = ZIndex,
+        })
+
+        table.insert(Tab.Sections, Objects.Right)
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            Parent = Objects.Right,
+            FillDirection = Enum.FillDirection.Vertical,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            VerticalFlex = Enum.UIFlexAlignment.Fill,
+            Padding = UDim.new(0, 8), -- Increased spacing between sections
+        })
+
+        Tab.right = Objects.Right
+    end
+
+    Tab.ZIndex = ZIndex
+
+    function Tab.Set(status, nested)
+        if self.TabsTweening and status then
+            return
+        end
+
+        Library.Tween(Objects.MainOutline, {
+            BackgroundTransparency = status and 0 or 1,
+        })
+        Library.Tween(Objects.Background, {
+            BackgroundTransparency = status and 0 or 1,
+        })
+        Library.ChangeObjectTheme(Objects.Text, {
+            TextColor3 = status and 'Text' or 'Dark Text',
+        }, true)
+
+        if Objects.Icon then
+            Library.ChangeObjectTheme(Objects.Icon, {
+                ImageColor3 = status and 'Text' or 'Dark Text',
+            }, true)
+        end
+
+        Objects.Page.Visible = status
+
+        if not self.TabsTweening then
+            if not nested then
+                self.TabsTweening = true
+
+                for _, tab in self.Tabs do
+                    if tab.Name ~= Tab.Name then
+                        tab.Set(false, true)
+                    end
+                end
+                for _, obj in Objects.Page:GetDescendants()do
+                    local Index = Utility.GetTransparency(obj)
+
+                    if Index then
+                        if type(Index) == 'table' then
+                            for _, prop in Index do
+                                Library.Fade(obj, prop, status)
+                            end
+                        else
+                            Library.Fade(obj, Index, status)
+                        end
+                    end
+                end
+
+                Objects.Page.Position = status and UDim2.fromOffset(0, 20) or UDim2.fromOffset(0, 0)
+
+                local Tween = Library.Tween(Objects.Page, {
+                    Position = status and UDim2.fromOffset(0, 0) or UDim2.fromOffset(0, 20),
+                })
+
+                Utility.Signal(Tween.Completed:Connect(function()
+                    self.TabsTweening = false
+                end))
+            end
+        end
+    end
+
+    Utility.Signal(Objects.Background.MouseButton1Click:Connect(function(
+    )
+        Tab.Set(true)
+    end))
+    table.insert(self.Tabs, Tab)
+
+    return setmetatable(Tab, Library)
+end
+
         function Library.PopupMenu(self, cfg)
             cfg = cfg or {}
             cfg = Library.Config(cfg, {size = 120})
