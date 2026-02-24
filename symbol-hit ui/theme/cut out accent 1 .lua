@@ -2249,9 +2249,8 @@ end
 
             return setmetatable(Tab, Library)
         end
-        
 
-function Library.Section(self, cfg)
+        function Library.Section(self, cfg)
     cfg = cfg or {}
     cfg = Library.Config(cfg, {
         name = 'New Section',
@@ -2286,7 +2285,7 @@ function Library.Section(self, cfg)
 
         -- Create a custom mask to hide the top border
         local cornerRadius = 5
-        local UICorner = Utility.New('UICorner', {
+        Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.MainOutline,
             CornerRadius = UDim.new(0, cornerRadius),
@@ -2294,12 +2293,12 @@ function Library.Section(self, cfg)
 
         ZIndex = ZIndex + 1
         
-        -- Section background (inner)
+        -- Section background (inner) - this now starts at the very top
         Objects.Outline = Utility.New('Frame', {
             Name = 'Background',
             BorderSizePixel = 0,
             Size = UDim2.new(1, -2, 1, -2),
-            Position = UDim2.new(0, 1, 0, 1),
+            Position = UDim2.new(0, 1, 0, 1), -- This creates the outline effect on sides and bottom only
             Parent = Objects.MainOutline,
             ZIndex = ZIndex,
             ClipsDescendants = true,
@@ -2315,7 +2314,7 @@ function Library.Section(self, cfg)
 
         Objects.Constraint = Utility.New('UISizeConstraint', {
             Parent = Objects.MainOutline,
-            MinSize = Vector2.new(0, 35),
+            MinSize = Vector2.new(0, 30), -- Even smaller minimum size since accent line is at the top
         })
         
         ZIndex = ZIndex + 1
@@ -2336,37 +2335,25 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Top accent line container - positioned at the very top
-        Objects.TopContainer = Utility.New('Frame', {
-            Name = 'TopContainer',
-            BorderSizePixel = 0,
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 20), -- Fixed height
-            Position = UDim2.new(0, 0, 0, 0), -- At the very top
-            Parent = Objects.Outline,
-            ZIndex = ZIndex,
-            ClipsDescendants = false,
-        })
-        
-        -- Background accent line (full width across the entire top)
+        -- Top accent line - positioned at the VERY TOP of the section (Y = 0)
         Objects.AccentLine = Utility.New('Frame', {
             Name = 'AccentLine',
             BorderSizePixel = 0,
             Size = UDim2.new(1, -2, 0, 2), -- Full width minus 2px for padding
-            Position = UDim2.new(0, 1, 0, 9), -- Slight left padding, positioned vertically
-            Parent = Objects.TopContainer,
+            Position = UDim2.new(0, 1, 0, 0), -- Positioned at the very top (Y = 0)
+            Parent = Objects.Outline,
             ZIndex = ZIndex,
         }, {
             BackgroundColor3 = 'Accent',
         })
         
-        -- Section title background (to cut the accent line)
+        -- Section title background (to cut the accent line) - positioned more to the left
         Objects.TitleBackground = Utility.New('Frame', {
             Name = 'TitleBackground',
             BorderSizePixel = 0,
             Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 45, 0, 0), -- Moved more to the right (45px from left)
-            Parent = Objects.TopContainer,
+            Position = UDim2.new(0, 15, 0, 0), -- Moved more to the left (15px from left)
+            Parent = Objects.Outline,
             ZIndex = ZIndex + 1,
             AutomaticSize = Enum.AutomaticSize.XY,
         }, {
@@ -2401,17 +2388,19 @@ function Library.Section(self, cfg)
         -- Add padding around the title
         Utility.New('UIPadding', {
             Name = 'UIPadding',
-            PaddingLeft = UDim.new(0, 8),  -- More padding on sides
-            PaddingRight = UDim.new(0, 8),
-            PaddingTop = UDim.new(0, 2),
-            PaddingBottom = UDim.new(0, 2),
+            PaddingLeft = UDim.new(0, 6),  -- Padding inside the background
+            PaddingRight = UDim.new(0, 6),
+            PaddingTop = UDim.new(0, 1),
+            PaddingBottom = UDim.new(0, 1),
             Parent = Objects.TitleBackground,
         })
         
-        -- Position the title background vertically centered on the accent line
+        -- Position the title background to sit ON the accent line
         local function PositionTitle()
             local titleHeight = Objects.Title.TextBounds.Y
-            Objects.TitleBackground.Position = UDim2.new(0, 45, 0, 9 - (titleHeight + 4) / 2) -- Y position to center on accent line
+            -- Position so that the background sits exactly on the accent line
+            -- The accent line is at Y=0, so we need to position the background so it's centered on the line
+            Objects.TitleBackground.Position = UDim2.new(0, 15, 0, -((titleHeight + 2) / 2) + 1) -- Center on the accent line
         end
         
         PositionTitle()
@@ -2421,7 +2410,7 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Description (if provided)
+        -- Description (if provided) - positioned below the accent line
         if cfg.description then
             Objects.Description = Utility.New('TextLabel', {
                 Name = 'Description',
@@ -2430,7 +2419,7 @@ function Library.Section(self, cfg)
                 TextSize = Library.FontSize - 2,
                 FontFace = Library.Font,
                 Size = UDim2.new(1, -24, 0, 0),
-                Position = UDim2.new(0, 12, 0, 22), -- Positioned below the accent line
+                Position = UDim2.new(0, 12, 0, 12), -- Positioned below the accent line (Y=12)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Text = cfg.description,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -2443,15 +2432,15 @@ function Library.Section(self, cfg)
             ZIndex = ZIndex + 1
         end
 
-        -- Content area (where all the features go)
-        local contentTopOffset = cfg.description and 55 or 30 -- Adjusted offsets
+        -- Content area (where all the features go) - starts right after the accent line
+        local contentTopOffset = cfg.description and 40 or 20 -- Adjusted offsets to start right after accent line
         
         Objects.Padded = Utility.New('Frame', {
             Name = 'Padded',
             BorderSizePixel = 0,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, -12, 1, -(contentTopOffset + 6)),
-            Position = UDim2.new(0, 6, 0, contentTopOffset),
+            Position = UDim2.new(0, 6, 0, contentTopOffset), -- Starts below description or accent line
             Parent = Objects.Outline,
             ZIndex = ZIndex,
         })
@@ -2662,6 +2651,7 @@ function Library.Section(self, cfg)
 
     return setmetatable(Section, Library)
 end
+
         function Library.PopupMenu(self, cfg)
             cfg = cfg or {}
             cfg = Library.Config(cfg, {size = 120})
