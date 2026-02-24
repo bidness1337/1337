@@ -2532,7 +2532,7 @@ function Library.Section(self, cfg)
     local Objects = Section.Objects
 
     do
-        -- Main section outline (outer border) - no top border
+        -- Main section outline (outer border) - NO TOP BORDER
         Objects.MainOutline = Utility.New('Frame', {
             Name = 'MainOutline',
             BorderSizePixel = 0,
@@ -2540,36 +2540,55 @@ function Library.Section(self, cfg)
             Position = UDim2.new(0, 0, 0, 0),
             Parent = Parent,
             ZIndex = ZIndex,
-            ClipsDescendants = true,
+            ClipsDescendants = false, -- IMPORTANT: Don't clip children
         }, {
             BackgroundColor3 = 'Inline',
         })
 
-        Utility.New('UICorner', {
+        -- Create a gradient or mask to hide the top border
+        -- We'll use a separate frame for the top part that has no border
+        
+        -- This is the top border HIDER - a frame that covers the top border area with section background color
+        Objects.TopHider = Utility.New('Frame', {
+            Name = 'TopHider',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 5), -- 5px tall to cover the top border
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = Objects.MainOutline,
+            ZIndex = ZIndex,
+            BackgroundTransparency = 1, -- Transparent because we want the background to show through
+        })
+        
+        -- Add corner radius to bottom only
+        local cornerRadius = 5
+        
+        -- Create a UICorner but it will affect all corners, so we need to mask the top
+        local UICorner = Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.MainOutline,
-            CornerRadius = UDim.new(0, 5),
+            CornerRadius = UDim.new(0, cornerRadius),
         })
-
+        
         ZIndex = ZIndex + 1
         
-        -- Section background (inner) - positioned to create outline on sides and bottom only
+        -- Section background (inner) - with no top border
         Objects.Outline = Utility.New('Frame', {
             Name = 'Background',
             BorderSizePixel = 0,
             Size = UDim2.new(1, -2, 1, -2),
-            Position = UDim2.new(0, 1, 0, 1), -- This creates the outline effect on sides and bottom only
+            Position = UDim2.new(0, 1, 0, 0), -- Start at Y=0 (no top border)
             Parent = Objects.MainOutline,
             ZIndex = ZIndex,
-            ClipsDescendants = true,
+            ClipsDescendants = false, -- IMPORTANT: Don't clip children
         }, {
             BackgroundColor3 = 'Section Background',
         })
 
+        -- Add corner radius to background
         Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.Outline,
-            CornerRadius = UDim.new(0, 5),
+            CornerRadius = UDim.new(0, cornerRadius),
         })
 
         Objects.Constraint = Utility.New('UISizeConstraint', {
@@ -2595,12 +2614,12 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Top accent line - DIRECTLY AT THE TOP (Y = 0)
+        -- Top accent line - FULL WIDTH, DIRECTLY AT THE TOP (Y = 0)
         Objects.AccentLine = Utility.New('Frame', {
             Name = 'AccentLine',
             BorderSizePixel = 0,
-            Size = UDim2.new(1, -12, 0, 2),
-            Position = UDim2.new(0, 6, 0, 0), -- Y = 0 (directly at the top)
+            Size = UDim2.new(1, 0, 0, 2), -- Full width, no side padding
+            Position = UDim2.new(0, 0, 0, 0), -- Y = 0 (directly at the top)
             Parent = Objects.Outline,
             ZIndex = ZIndex,
         }, {
@@ -2659,8 +2678,8 @@ function Library.Section(self, cfg)
         local function PositionTitle()
             local titleHeight = Objects.Title.TextBounds.Y
             local bgHeight = titleHeight + 2
-            -- Position so HALF the background is above the accent line and HALF below
-            -- This makes the text sit perfectly on the line
+            -- Position so the text sits ON the accent line (half above, half below)
+            -- This allows the text to extend above the section if needed
             Objects.TitleBackground.Position = UDim2.new(0, 15, 0, - (bgHeight / 2) + 1)
         end
         
@@ -2675,7 +2694,7 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Description (if provided) - positioned directly below the accent line
+        -- Description (if provided)
         if cfg.description then
             Objects.Description = Utility.New('TextLabel', {
                 Name = 'Description',
@@ -2684,7 +2703,7 @@ function Library.Section(self, cfg)
                 TextSize = Library.FontSize - 2,
                 FontFace = Library.Font,
                 Size = UDim2.new(1, -24, 0, 0),
-                Position = UDim2.new(0, 12, 0, 10), -- Positioned directly below the accent line
+                Position = UDim2.new(0, 12, 0, 12), -- Positioned below the title
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Text = cfg.description,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -2697,8 +2716,8 @@ function Library.Section(self, cfg)
             ZIndex = ZIndex + 1
         end
 
-        -- Content area - starts right after the description or title
-        local contentTopOffset = cfg.description and 35 or 15
+        -- Content area
+        local contentTopOffset = cfg.description and 40 or 20
         
         Objects.Padded = Utility.New('Frame', {
             Name = 'Padded',
@@ -2726,6 +2745,7 @@ function Library.Section(self, cfg)
             MidImage = Library.ScrollBar,
             TopImage = Library.ScrollBar,
             ScrollBarThickness = 2,
+            ClipsDescendants = true, -- Keep clipping for scrolling frame
         }, {
             ScrollBarImageColor3 = 'Accent',
         })
