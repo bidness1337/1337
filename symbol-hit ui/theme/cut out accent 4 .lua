@@ -2505,254 +2505,421 @@ function Library.Tab(self, cfg)
     return setmetatable(Tab, Library)
 end
 
-function Library.Tab(self, cfg)
+function Library.Section(self, cfg)
     cfg = cfg or {}
     cfg = Library.Config(cfg, {
-        name = 'New Tab',
-        icon = 'rbxassetid://284402752',
+        name = 'New Section',
+        description = nil,
+        side = 'left',
+        size = 1,
     })
 
-    local Tab = {
+    local Section = {
         ZIndex = self.ZIndex,
-        Tweening = false,
         Objects = {},
-        Sections = {},
-        Name = cfg.name,
+        Resizing = false,
+        Dragging = false,
     }
-    local ZIndex = Tab.ZIndex
-    local Objects = Tab.Objects
+    
+    -- Get the parent container (left or right side)
+    local Parent = self[cfg.side:lower()]
+    if not Parent then
+        warn("Section side '" .. cfg.side .. "' not found")
+        return
+    end
+    
+    local ZIndex = Section.ZIndex
+    local Objects = Section.Objects
 
     do
-        Objects.Holder = Utility.New('Frame', {
-            Name = 'Holder',
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 0),
-            AutomaticSize = Enum.AutomaticSize.Y,
-            Parent = self.SideHolder,
-            ZIndex = ZIndex,
-        })
-        ZIndex = ZIndex + 1
-        
-        -- Tab button outline
+        -- Main section outline (outer border)
         Objects.MainOutline = Utility.New('Frame', {
             Name = 'MainOutline',
             BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 0),
-            AutomaticSize = Enum.AutomaticSize.Y,
-            Parent = Objects.Holder,
+            Size = UDim2.fromScale(1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = Parent, -- This is crucial - parent must be set here
             ZIndex = ZIndex,
+            ClipsDescendants = true,
         }, {
             BackgroundColor3 = 'Inline',
         })
-        
+
         Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.MainOutline,
             CornerRadius = UDim.new(0, 5),
         })
-        
+
         ZIndex = ZIndex + 1
-        Objects.Background = Utility.New('TextButton', {
+        
+        -- Section background (inner)
+        Objects.Outline = Utility.New('Frame', {
             Name = 'Background',
+            BorderSizePixel = 0,
             Size = UDim2.new(1, -2, 1, -2),
             Position = UDim2.new(0, 1, 0, 1),
-            AutomaticSize = Enum.AutomaticSize.Y,
-            BorderSizePixel = 0,
-            BackgroundTransparency = 1,
-            Text = '',
-            AutoButtonColor = false,
-            Style = Enum.ButtonStyle.Custom,
             Parent = Objects.MainOutline,
             ZIndex = ZIndex,
             ClipsDescendants = true,
         }, {
-            BackgroundColor3 = 'Background',
+            BackgroundColor3 = 'Section Background',
         })
-        ZIndex = ZIndex + 1
 
         Utility.New('UICorner', {
             Name = 'UICorner',
-            Parent = Objects.Background,
+            Parent = Objects.Outline,
             CornerRadius = UDim.new(0, 5),
         })
-        Utility.New('UIPadding', {
-            Name = 'UIPadding',
-            Parent = Objects.Background,
-            PaddingLeft = UDim.new(0, 8),
-            PaddingRight = UDim.new(0, 8),
-            PaddingTop = UDim.new(0, 6),
-            PaddingBottom = UDim.new(0, 6),
-        })
-        Utility.New('UIListLayout', {
-            Name = 'UIListLayout',
-            Parent = Objects.Background,
-            FillDirection = Enum.FillDirection.Horizontal,
-            SortOrder = Enum.SortOrder.LayoutOrder,
-            Padding = UDim.new(0, 7),
-        })
 
-        if cfg.icon then
-            Objects.Icon = Utility.New('ImageLabel', {
-                Name = 'Icon',
-                Size = UDim2.new(0, 20, 0, 20),
-                Position = UDim2.new(0, 0, 0, 0),
-                AutomaticSize = Enum.AutomaticSize.XY,
-                BackgroundTransparency = 1,
-                Image = cfg.icon,
-                Parent = Objects.Background,
-                ZIndex = ZIndex,
-            }, {
-                ImageColor3 = 'Dark Text',
-            })
-        end
-
-        Objects.Text = Utility.New('TextLabel', {
-            Name = 'Text',
+        Objects.Constraint = Utility.New('UISizeConstraint', {
+            Parent = Objects.MainOutline,
+            MinSize = Vector2.new(0, 35),
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Dragging handle at the top
+        Objects.Dragging = Utility.New('TextButton', {
+            Name = 'Dragging',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -10, 0, 5),
+            Position = UDim2.new(0, 5, 0, 0),
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Top accent line - positioned at the top of the section
+        Objects.AccentLine = Utility.New('Frame', {
+            Name = 'AccentLine',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, -12, 0, 2),
+            Position = UDim2.new(0, 6, 0, 2), -- 2px from the top
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        }, {
+            BackgroundColor3 = 'Accent',
+        })
+        
+        -- Section title background (to cut the accent line)
+        Objects.TitleBackground = Utility.New('Frame', {
+            Name = 'TitleBackground',
+            BorderSizePixel = 0,
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0, 15, 0, 0), -- 15px from left, will be updated
+            Parent = Objects.Outline,
+            ZIndex = ZIndex + 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+        }, {
+            BackgroundColor3 = 'Section Background',
+        })
+        
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.TitleBackground,
+            CornerRadius = UDim.new(0, 3),
+        })
+        
+        ZIndex = ZIndex + 2
+        
+        -- Section title
+        Objects.Title = Utility.New('TextLabel', {
+            Name = 'Title',
             TextStrokeTransparency = 0.8,
             BackgroundTransparency = 1,
             TextSize = Library.FontSize,
             FontFace = Library.Font,
             Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 0, 0, 0),
-            TextColor3 = Color3.fromRGB(255, 255, 255),
             Text = cfg.name,
-            Parent = Objects.Background,
+            AutomaticSize = Enum.AutomaticSize.XY,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = Objects.TitleBackground,
             ZIndex = ZIndex,
         }, {
-            TextColor3 = 'Dark Text',
+            TextColor3 = 'Accent',
         })
-        Objects.Text.Size = UDim2.new(0, Objects.Text.TextBounds.X, 0, Objects.Text.TextBounds.Y - 2)
-
-        if Objects.Icon then
-            Objects.Icon.Size = UDim2.new(0, Objects.Text.TextBounds.Y, 0, Objects.Text.TextBounds.Y)
+        
+        -- Add padding around the title
+        Utility.New('UIPadding', {
+            Name = 'UIPadding',
+            PaddingLeft = UDim.new(0, 6),
+            PaddingRight = UDim.new(0, 6),
+            PaddingTop = UDim.new(0, 1),
+            PaddingBottom = UDim.new(0, 1),
+            Parent = Objects.TitleBackground,
+        })
+        
+        -- Position the title background to sit ON the accent line
+        local function PositionTitle()
+            local titleHeight = Objects.Title.TextBounds.Y
+            local bgHeight = titleHeight + 2
+            -- Center the background on the accent line (accent line is at Y=2)
+            Objects.TitleBackground.Position = UDim2.new(0, 15, 0, 2 - (bgHeight / 2) + 1)
         end
-
-        Objects.Page = Utility.New('Frame', {
-            Name = 'Page',
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 1, 0),
-            Position = UDim2.new(0, 0, 0, 0),
-            Parent = self.PageHolder,
-            Visible = false,
-            ZIndex = ZIndex,
-        })
+        
+        -- Wait a tiny moment for the text bounds to be calculated
+        task.spawn(function()
+            task.wait()
+            PositionTitle()
+        end)
+        
+        -- Update position if text bounds change
+        Utility.Signal(Objects.Title:GetPropertyChangedSignal('TextBounds'):Connect(PositionTitle))
+        
         ZIndex = ZIndex + 1
         
-        -- Left side container with increased spacing
-        Objects.Left = Utility.New('Frame', {
-            Name = 'Left',
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0.5, -2, 1, 0),
-            Position = UDim2.new(0, 0, 0, 0),
-            Parent = Objects.Page,
-            ZIndex = ZIndex,
-        })
+        -- Description (if provided)
+        if cfg.description then
+            Objects.Description = Utility.New('TextLabel', {
+                Name = 'Description',
+                TextStrokeTransparency = 0.8,
+                BackgroundTransparency = 1,
+                TextSize = Library.FontSize - 2,
+                FontFace = Library.Font,
+                Size = UDim2.new(1, -24, 0, 0),
+                Position = UDim2.new(0, 12, 0, 12), -- Positioned below the title
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = cfg.description,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Objects.Outline,
+                ZIndex = ZIndex,
+                TextWrapped = true,
+            }, {
+                TextColor3 = 'Light Text',
+            })
+            ZIndex = ZIndex + 1
+        end
 
-        table.insert(Tab.Sections, Objects.Left)
-        Utility.New('UIListLayout', {
-            Name = 'UIListLayout',
-            Parent = Objects.Left,
-            FillDirection = Enum.FillDirection.Vertical,
-            SortOrder = Enum.SortOrder.LayoutOrder,
-            VerticalFlex = Enum.UIFlexAlignment.Fill,
-            Padding = UDim.new(0, 8), -- Increased spacing between sections
-        })
-
-        Tab.left = Objects.Left
+        -- Content area
+        local contentTopOffset = cfg.description and 45 or 22
         
-        -- Right side container with increased spacing
-        Objects.Right = Utility.New('Frame', {
-            Name = 'Right',
-            BackgroundTransparency = 1,
+        Objects.Padded = Utility.New('Frame', {
+            Name = 'Padded',
             BorderSizePixel = 0,
-            Size = UDim2.new(0.5, -2, 1, 0),
-            Position = UDim2.new(0.5, 2, 0, 0),
-            Parent = Objects.Page,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -12, 1, -(contentTopOffset + 6)),
+            Position = UDim2.new(0, 6, 0, contentTopOffset),
+            Parent = Objects.Outline,
             ZIndex = ZIndex,
         })
+        
+        ZIndex = ZIndex + 1
+        
+        Objects.Scrolling = Utility.New('ScrollingFrame', {
+            Name = 'Scrolling',
+            Size = UDim2.new(1, 0, 1, 0),
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Parent = Objects.Padded,
+            ZIndex = ZIndex,
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            BottomImage = Library.ScrollBar,
+            MidImage = Library.ScrollBar,
+            TopImage = Library.ScrollBar,
+            ScrollBarThickness = 2,
+        }, {
+            ScrollBarImageColor3 = 'Accent',
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        Objects.Content = Utility.New('Frame', {
+            Name = 'Content',
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Parent = Objects.Scrolling,
+            ZIndex = ZIndex,
+        })
+        Section.Holder = Objects.Content
 
-        table.insert(Tab.Sections, Objects.Right)
         Utility.New('UIListLayout', {
             Name = 'UIListLayout',
-            Parent = Objects.Right,
             FillDirection = Enum.FillDirection.Vertical,
             SortOrder = Enum.SortOrder.LayoutOrder,
-            VerticalFlex = Enum.UIFlexAlignment.Fill,
-            Padding = UDim.new(0, 8), -- Increased spacing between sections
+            Parent = Objects.Content,
+            Padding = UDim.new(0, 5),
         })
 
-        Tab.right = Objects.Right
-    end
+        ZIndex = ZIndex + 1
 
-    Tab.ZIndex = ZIndex
-
-    function Tab.Set(status, nested)
-        if self.TabsTweening and status then
-            return
-        end
-
-        Library.Tween(Objects.MainOutline, {
-            BackgroundTransparency = status and 0 or 1,
-        })
-        Library.Tween(Objects.Background, {
-            BackgroundTransparency = status and 0 or 1,
-        })
-        Library.ChangeObjectTheme(Objects.Text, {
-            TextColor3 = status and 'Text' or 'Dark Text',
-        }, true)
-
-        if Objects.Icon then
-            Library.ChangeObjectTheme(Objects.Icon, {
-                ImageColor3 = status and 'Text' or 'Dark Text',
-            }, true)
-        end
-
-        Objects.Page.Visible = status
-
-        if not self.TabsTweening then
-            if not nested then
-                self.TabsTweening = true
-
-                for _, tab in self.Tabs do
-                    if tab.Name ~= Tab.Name then
-                        tab.Set(false, true)
-                    end
-                end
-                for _, obj in Objects.Page:GetDescendants()do
-                    local Index = Utility.GetTransparency(obj)
-
-                    if Index then
-                        if type(Index) == 'table' then
-                            for _, prop in Index do
-                                Library.Fade(obj, prop, status)
-                            end
-                        else
-                            Library.Fade(obj, Index, status)
-                        end
-                    end
-                end
-
-                Objects.Page.Position = status and UDim2.fromOffset(0, 20) or UDim2.fromOffset(0, 0)
-
-                local Tween = Library.Tween(Objects.Page, {
-                    Position = status and UDim2.fromOffset(0, 0) or UDim2.fromOffset(0, 20),
-                })
-
-                Utility.Signal(Tween.Completed:Connect(function()
-                    self.TabsTweening = false
-                end))
+        -- Handle canvas size updates
+        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
+            if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
+                Objects.Content.Size = UDim2.new(1, -7, 0, 0)
+            else
+                Objects.Content.Size = UDim2.new(1, 0, 0, 0)
             end
-        end
+        end))
+        
+        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+            if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
+                Objects.Content.Size = UDim2.new(1, -7, 0, 0)
+            else
+                Objects.Content.Size = UDim2.new(1, 0, 0, 0)
+            end
+        end))
+
+        -- Resize bar at the bottom
+        Objects.ResizeBar = Utility.New('TextButton', {
+            Name = 'ResizeBar',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 3),
+            Position = UDim2.new(0, 0, 1, -3),
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.MainOutline,
+            ZIndex = ZIndex,
+        })
     end
 
-    Utility.Signal(Objects.Background.MouseButton1Click:Connect(function(
-    )
-        Tab.Set(true)
-    end))
-    table.insert(self.Tabs, Tab)
+    Section.ZIndex = ZIndex
 
-    return setmetatable(Tab, Library)
+    -- Resize functionality
+    Utility.Signal(Objects.ResizeBar.MouseButton1Down:Connect(function()
+        Section.Resizing = true
+
+        local Resize = Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+            if not Section.Resizing or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+                return
+            end
+
+            Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.MainOutline.AbsolutePosition.Y, 35, 9e9))
+        end))
+        
+        local ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                Section.Resizing = false
+
+                Resize:Disconnect()
+                ResizeStop:Disconnect()
+            end
+        end))
+    end))
+
+    Section.OldParent = Objects.MainOutline.Parent
+
+    -- Dragging functionality
+    Utility.Signal(Objects.Dragging.MouseButton1Down:Connect(function()
+        Section.Dragging = true
+
+        local MousePosition = UserInputService:GetMouseLocation()
+        local Offset = Vector2.new(MousePosition.X - Objects.Dragging.AbsolutePosition.X, MousePosition.Y - Objects.Dragging.AbsolutePosition.Y)
+
+        Objects.MainOutline.Size = UDim2.new(0, Objects.MainOutline.AbsoluteSize.X, 0, Objects.MainOutline.AbsoluteSize.Y)
+        Objects.MainOutline.Position = UDim2.new(0, Objects.MainOutline.AbsolutePosition.X, 0, Objects.MainOutline.AbsolutePosition.Y)
+        Objects.MainOutline.Parent = Library.ScreenGui
+
+        local ClosestHolder, Indicator
+        local Drag = Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+            if not Section.Dragging or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+                return
+            end
+
+            Objects.MainOutline.Position = UDim2.new(0, input.Position.X - Offset.X, 0, input.Position.Y - Offset.Y)
+
+            local MinDistance = math.huge
+
+            for _, holder in ipairs(self.Sections or {}) do
+                if holder and holder:IsA('Frame') then
+                    local Distance = (Vector2.new(input.Position.x, input.Position.y) - holder.AbsolutePosition).Magnitude
+                    if Distance < MinDistance then
+                        MinDistance = Distance
+                        ClosestHolder = holder
+                    end
+                end
+            end
+
+            if ClosestHolder then
+                if not Indicator then
+                    Indicator = Utility.New('Frame', {
+                        Parent = ClosestHolder,
+                        BorderSizePixel = 0,
+                        Size = UDim2.new(1, 0, 0, Objects.MainOutline.AbsoluteSize.Y),
+                        ZIndex = 5000,
+                    }, {
+                        BackgroundColor3 = 'Accent',
+                    })
+
+                    Utility.New('UICorner', {
+                        Name = 'UICorner',
+                        Parent = Indicator,
+                        CornerRadius = UDim.new(0, 5),
+                    })
+
+                    local Background = Utility.New('Frame', {
+                        Parent = Indicator,
+                        BorderSizePixel = 0,
+                        Size = UDim2.new(1, -2, 1, -2),
+                        Position = UDim2.new(0, 1, 0, 1),
+                        ZIndex = 5001,
+                    }, {
+                        BackgroundColor3 = 'Section Background',
+                    })
+
+                    Utility.New('UICorner', {
+                        Name = 'UICorner',
+                        Parent = Background,
+                        CornerRadius = UDim.new(0, 5),
+                    })
+                    Utility.New('UISizeConstraint', {
+                        Parent = Indicator,
+                        MaxSize = Objects.Constraint.MaxSize,
+                        MinSize = Objects.Constraint.MinSize,
+                    })
+                end
+
+                Indicator.Parent = ClosestHolder
+                Indicator.Position = UDim2.new(0, 0, 0, 0)
+                Indicator.Visible = true
+            else
+                if Indicator then
+                    Indicator:Destroy()
+                    Indicator = nil
+                end
+            end
+        end))
+        
+        local DragStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                Section.Dragging = false
+
+                Drag:Disconnect()
+                DragStop:Disconnect()
+
+                Objects.MainOutline.Position = UDim2.new()
+                Objects.MainOutline.Size = UDim2.new(1, 0, 0, 0)
+
+                if ClosestHolder then
+                    Objects.MainOutline.Parent = ClosestHolder
+                else
+                    Objects.MainOutline.Parent = Section.OldParent
+                end
+                if Indicator then
+                    Indicator:Destroy()
+                end
+            end
+        end))
+    end))
+
+    -- Add this section to the tab's sections list
+    if self.Sections then
+        table.insert(self.Sections, Objects.MainOutline)
+    end
+
+    return setmetatable(Section, Library)
 end
 
         function Library.PopupMenu(self, cfg)
