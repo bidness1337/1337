@@ -3333,6 +3333,317 @@ end
 
             return Popup
         end
+
+        function Library.Section(self, cfg)
+    cfg = cfg or {}
+    cfg = Library.Config(cfg, {
+        name = 'New Section',
+        description = nil,
+        side = 'left',
+        size = 1,
+    })
+
+    local Section = {
+        ZIndex = self.ZIndex,
+        Objects = {},
+        Resizing = false,
+        Dragging = false,
+    }
+    
+    -- Get the parent container (left or right side)
+    local Parent = self[cfg.side:lower()]
+    if not Parent then
+        warn("Section side '" .. cfg.side .. "' not found")
+        return
+    end
+    
+    local ZIndex = Section.ZIndex
+    local Objects = Section.Objects
+
+    do
+        -- Main section outline (outer border)
+        Objects.MainOutline = Utility.New('Frame', {
+            Name = 'MainOutline',
+            BorderSizePixel = 0,
+            Size = UDim2.fromScale(1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = Parent, -- CRITICAL: Parent to left/right side
+            ZIndex = ZIndex,
+            ClipsDescendants = false,
+        }, {
+            BackgroundColor3 = 'Inline',
+        })
+
+        -- Add corner radius
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.MainOutline,
+            CornerRadius = UDim.new(0, 5),
+        })
+
+        ZIndex = ZIndex + 1
+        
+        -- Section background (inner)
+        Objects.Outline = Utility.New('Frame', {
+            Name = 'Background',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, -2, 1, -2),
+            Position = UDim2.new(0, 1, 0, 0), -- Start at Y=0 to remove top border
+            Parent = Objects.MainOutline,
+            ZIndex = ZIndex,
+            ClipsDescendants = false,
+        }, {
+            BackgroundColor3 = 'Section Background',
+        })
+
+        -- Add corner radius to background
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.Outline,
+            CornerRadius = UDim.new(0, 5),
+        })
+
+        Objects.Constraint = Utility.New('UISizeConstraint', {
+            Parent = Objects.MainOutline,
+            MinSize = Vector2.new(0, 30),
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Dragging handle at the top
+        Objects.Dragging = Utility.New('TextButton', {
+            Name = 'Dragging',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -10, 0, 5),
+            Position = UDim2.new(0, 5, 0, 0),
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Top accent line - FULL WIDTH at the VERY TOP
+        Objects.AccentLine = Utility.New('Frame', {
+            Name = 'AccentLine',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 2), -- Full width, no padding
+            Position = UDim2.new(0, 0, 0, 0), -- Y = 0 (directly at the top)
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        }, {
+            BackgroundColor3 = 'Accent',
+        })
+        
+        -- Section title background (to cut the accent line)
+        Objects.TitleBackground = Utility.New('Frame', {
+            Name = 'TitleBackground',
+            BorderSizePixel = 0,
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0, 15, 0, 0),
+            Parent = Objects.Outline,
+            ZIndex = ZIndex + 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+        }, {
+            BackgroundColor3 = 'Section Background',
+        })
+        
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.TitleBackground,
+            CornerRadius = UDim.new(0, 3),
+        })
+        
+        ZIndex = ZIndex + 2
+        
+        -- Section title
+        Objects.Title = Utility.New('TextLabel', {
+            Name = 'Title',
+            TextStrokeTransparency = 0.8,
+            BackgroundTransparency = 1,
+            TextSize = Library.FontSize,
+            FontFace = Library.Font,
+            Size = UDim2.new(0, 0, 0, 0),
+            Text = cfg.name,
+            AutomaticSize = Enum.AutomaticSize.XY,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = Objects.TitleBackground,
+            ZIndex = ZIndex,
+        }, {
+            TextColor3 = 'Accent',
+        })
+        
+        -- Add padding around the title
+        Utility.New('UIPadding', {
+            Name = 'UIPadding',
+            PaddingLeft = UDim.new(0, 6),
+            PaddingRight = UDim.new(0, 6),
+            PaddingTop = UDim.new(0, 1),
+            PaddingBottom = UDim.new(0, 1),
+            Parent = Objects.TitleBackground,
+        })
+        
+        -- Position the title background to sit ON the accent line
+        local function PositionTitle()
+            local titleHeight = Objects.Title.TextBounds.Y
+            local bgHeight = titleHeight + 2
+            Objects.TitleBackground.Position = UDim2.new(0, 15, 0, - (bgHeight / 2) + 1)
+        end
+        
+        task.spawn(function()
+            task.wait()
+            PositionTitle()
+        end)
+        
+        Utility.Signal(Objects.Title:GetPropertyChangedSignal('TextBounds'):Connect(PositionTitle))
+        
+        ZIndex = ZIndex + 1
+        
+        -- Description (if provided)
+        if cfg.description then
+            Objects.Description = Utility.New('TextLabel', {
+                Name = 'Description',
+                TextStrokeTransparency = 0.8,
+                BackgroundTransparency = 1,
+                TextSize = Library.FontSize - 2,
+                FontFace = Library.Font,
+                Size = UDim2.new(1, -24, 0, 0),
+                Position = UDim2.new(0, 12, 0, 12),
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = cfg.description,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Objects.Outline,
+                ZIndex = ZIndex,
+                TextWrapped = true,
+            }, {
+                TextColor3 = 'Light Text',
+            })
+            ZIndex = ZIndex + 1
+        end
+
+        -- Content area - THIS IS WHERE TOGGLES/BUTTONS GO
+        local contentTopOffset = cfg.description and 40 or 20
+        
+        Objects.Padded = Utility.New('Frame', {
+            Name = 'Padded',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -12, 1, -(contentTopOffset + 6)),
+            Position = UDim2.new(0, 6, 0, contentTopOffset),
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        Objects.Scrolling = Utility.New('ScrollingFrame', {
+            Name = 'Scrolling',
+            Size = UDim2.new(1, 0, 1, 0),
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Parent = Objects.Padded,
+            ZIndex = ZIndex,
+            AutomaticCanvasSize = Enum.AutomaticSize.Y,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            BottomImage = Library.ScrollBar,
+            MidImage = Library.ScrollBar,
+            TopImage = Library.ScrollBar,
+            ScrollBarThickness = 2,
+            ClipsDescendants = true,
+        }, {
+            ScrollBarImageColor3 = 'Accent',
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        Objects.Content = Utility.New('Frame', {
+            Name = 'Content',
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Parent = Objects.Scrolling,
+            ZIndex = ZIndex,
+        })
+        Section.Holder = Objects.Content -- THIS IS THE HOLDER THAT TOGGLES USE
+
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            FillDirection = Enum.FillDirection.Vertical,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = Objects.Content,
+            Padding = UDim.new(0, 5),
+        })
+
+        ZIndex = ZIndex + 1
+
+        -- Handle canvas size updates
+        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteCanvasSize'):Connect(function()
+            if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
+                Objects.Content.Size = UDim2.new(1, -7, 0, 0)
+            else
+                Objects.Content.Size = UDim2.new(1, 0, 0, 0)
+            end
+        end))
+        
+        Utility.Signal(Objects.Scrolling:GetPropertyChangedSignal('AbsoluteSize'):Connect(function()
+            if Objects.Scrolling.AbsoluteCanvasSize.Y > Objects.Scrolling.AbsoluteSize.Y then
+                Objects.Content.Size = UDim2.new(1, -7, 0, 0)
+            else
+                Objects.Content.Size = UDim2.new(1, 0, 0, 0)
+            end
+        end))
+
+        -- Resize bar at the bottom
+        Objects.ResizeBar = Utility.New('TextButton', {
+            Name = 'ResizeBar',
+            BorderSizePixel = 0,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 3),
+            Position = UDim2.new(0, 0, 1, -3),
+            AutoButtonColor = false,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.MainOutline,
+            ZIndex = ZIndex,
+        })
+    end
+
+    Section.ZIndex = ZIndex
+
+    -- Resize functionality
+    Utility.Signal(Objects.ResizeBar.MouseButton1Down:Connect(function()
+        Section.Resizing = true
+
+        local Resize = Utility.Signal(UserInputService.InputChanged:Connect(function(input)
+            if not Section.Resizing or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+                return
+            end
+
+            Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.MainOutline.AbsolutePosition.Y, 30, 9e9))
+        end))
+        
+        local ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                Section.Resizing = false
+                Resize:Disconnect()
+                ResizeStop:Disconnect()
+            end
+        end))
+    end))
+
+    -- Add this section to the tab's sections list
+    if self.Sections then
+        table.insert(self.Sections, Objects.MainOutline)
+    end
+
+    return setmetatable(Section, Library)
+end
         
     function Library.Section(self, cfg)
     cfg = cfg or {}
