@@ -2271,7 +2271,7 @@ end
     local Objects = Section.Objects
 
     do
-        -- Main section outline (outer border)
+        -- Main section outline (outer border) - but we'll make it invisible at the top
         Objects.MainOutline = Utility.New('Frame', {
             Name = 'MainOutline',
             BorderSizePixel = 0,
@@ -2284,10 +2284,12 @@ end
             BackgroundColor3 = 'Inline',
         })
 
+        -- Custom corner to hide top outline
+        local cornerRadius = 5
         Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.MainOutline,
-            CornerRadius = UDim.new(0, 5),
+            CornerRadius = UDim.new(0, cornerRadius),
         })
 
         ZIndex = ZIndex + 1
@@ -2308,23 +2310,23 @@ end
         Utility.New('UICorner', {
             Name = 'UICorner',
             Parent = Objects.Outline,
-            CornerRadius = UDim.new(0, 5),
+            CornerRadius = UDim.new(0, cornerRadius),
         })
 
         Objects.Constraint = Utility.New('UISizeConstraint', {
             Parent = Objects.MainOutline,
-            MinSize = Vector2.new(0, 40),
+            MinSize = Vector2.new(0, 35), -- Slightly smaller minimum size
         })
         
         ZIndex = ZIndex + 1
         
-        -- Dragging handle at the top
+        -- Dragging handle at the top (small invisible area for dragging)
         Objects.Dragging = Utility.New('TextButton', {
             Name = 'Dragging',
             BorderSizePixel = 0,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 5),
-            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, -10, 0, 5),
+            Position = UDim2.new(0, 5, 0, 0),
             AutoButtonColor = false,
             Style = Enum.ButtonStyle.Custom,
             Text = '',
@@ -2334,19 +2336,52 @@ end
         
         ZIndex = ZIndex + 1
         
-        -- Top accent line (full width, sits behind the text)
-        Objects.TopAccentLine = Utility.New('Frame', {
-            Name = 'TopAccentLine',
+        -- Create a container for the top area to handle the cut-out accent line
+        Objects.TopContainer = Utility.New('Frame', {
+            Name = 'TopContainer',
             BorderSizePixel = 0,
-            Size = UDim2.new(1, -12, 0, 2), -- Full width with padding on sides
-            Position = UDim2.new(0, 6, 0, 8), -- Positioned where the text will sit
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, -12, 0, 20), -- Fixed height for the top area
+            Position = UDim2.new(0, 6, 0, 2), -- Small top padding
             Parent = Objects.Outline,
+            ZIndex = ZIndex,
+            ClipsDescendants = false, -- Allow the accent line to show through
+        })
+        
+        -- Background accent line (full width, sits behind everything)
+        Objects.AccentLine = Utility.New('Frame', {
+            Name = 'AccentLine',
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 2),
+            Position = UDim2.new(0, 0, 0, 9), -- Positioned in the middle of the top container
+            Parent = Objects.TopContainer,
             ZIndex = ZIndex,
         }, {
             BackgroundColor3 = 'Accent',
         })
-
-        -- Section title (positioned directly on the accent line)
+        
+        -- Section title background (to cut the accent line)
+        Objects.TitleBackground = Utility.New('Frame', {
+            Name = 'TitleBackground',
+            BorderSizePixel = 0,
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            Parent = Objects.TopContainer,
+            ZIndex = ZIndex + 1,
+            AutomaticSize = Enum.AutomaticSize.XY,
+        }, {
+            BackgroundColor3 = 'Section Background', -- Matches section background
+        })
+        
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            Parent = Objects.TitleBackground,
+            CornerRadius = UDim.new(0, 3),
+        })
+        
+        ZIndex = ZIndex + 2
+        
+        -- Section title (positioned on the accent line)
         Objects.Title = Utility.New('TextLabel', {
             Name = 'Title',
             TextStrokeTransparency = 0.8,
@@ -2357,19 +2392,43 @@ end
             Text = cfg.name,
             AutomaticSize = Enum.AutomaticSize.XY,
             TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = Objects.Outline,
-            ZIndex = ZIndex + 1,
+            Parent = Objects.TitleBackground,
+            ZIndex = ZIndex,
         }, {
-            TextColor3 = 'Accent', -- Accent color for the text
+            TextColor3 = 'Accent',
         })
-
-        -- Calculate text height for proper positioning (center text on the accent line)
-        local textHeight = Objects.Title.TextBounds.Y
-        Objects.Title.Position = UDim2.new(0, 12, 0, 8 - (textHeight / 2) + 1) -- Center text on the accent line
-
-        ZIndex = ZIndex + 2
-
-        -- Description (if provided) - positioned below the title
+        
+        -- Add padding around the title
+        Utility.New('UIPadding', {
+            Name = 'UIPadding',
+            PaddingLeft = UDim.new(0, 4),
+            PaddingRight = UDim.new(0, 4),
+            PaddingTop = UDim.new(0, 2),
+            PaddingBottom = UDim.new(0, 2),
+            Parent = Objects.TitleBackground,
+        })
+        
+        -- Position the title background on the accent line
+        local function PositionTitle()
+            local titleWidth = Objects.Title.TextBounds.X
+            local titleHeight = Objects.Title.TextBounds.Y
+            
+            -- Set the size of the background (text width + padding)
+            Objects.TitleBackground.Size = UDim2.new(0, titleWidth + 8, 0, titleHeight + 4)
+            
+            -- Position it in the top container, centered vertically on the accent line
+            Objects.TitleBackground.Position = UDim2.new(0, 0, 0, 9 - (titleHeight + 4) / 2)
+        end
+        
+        -- Call initially and whenever text changes
+        PositionTitle()
+        
+        -- Update position if text bounds change
+        Utility.Signal(Objects.Title:GetPropertyChangedSignal('TextBounds'):Connect(PositionTitle))
+        
+        ZIndex = ZIndex + 1
+        
+        -- Description (if provided) - positioned below the accent line
         if cfg.description then
             Objects.Description = Utility.New('TextLabel', {
                 Name = 'Description',
@@ -2378,7 +2437,7 @@ end
                 TextSize = Library.FontSize - 2,
                 FontFace = Library.Font,
                 Size = UDim2.new(1, -24, 0, 0),
-                Position = UDim2.new(0, 12, 0, 20), -- Positioned below the title
+                Position = UDim2.new(0, 12, 0, 25), -- Positioned below the top container
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Text = cfg.description,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -2391,8 +2450,8 @@ end
             ZIndex = ZIndex + 1
         end
 
-        -- Content area (this is where all the toggles, buttons, etc. go)
-        local contentTopOffset = cfg.description and 45 or 30 -- Offset based on whether there's a description
+        -- Content area (where all the toggles, buttons, etc. go)
+        local contentTopOffset = cfg.description and 55 or 30 -- Offset based on whether there's a description
         
         Objects.Padded = Utility.New('Frame', {
             Name = 'Padded',
@@ -2506,7 +2565,7 @@ end
 
     Section.OldParent = Objects.MainOutline.Parent
 
-    -- Dragging functionality (moved to the dragging handle at the top)
+    -- Dragging functionality
     Utility.Signal(Objects.Dragging.MouseButton1Down:Connect(function()
         Section.Dragging = true
 
