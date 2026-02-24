@@ -2532,13 +2532,13 @@ function Library.Section(self, cfg)
     local Objects = Section.Objects
 
     do
-        -- Main section outline (outer border)
+        -- Main section outline (outer border) - no top border
         Objects.MainOutline = Utility.New('Frame', {
             Name = 'MainOutline',
             BorderSizePixel = 0,
             Size = UDim2.fromScale(1, 0),
             Position = UDim2.new(0, 0, 0, 0),
-            Parent = Parent, -- This is crucial - parent must be set here
+            Parent = Parent,
             ZIndex = ZIndex,
             ClipsDescendants = true,
         }, {
@@ -2553,12 +2553,12 @@ function Library.Section(self, cfg)
 
         ZIndex = ZIndex + 1
         
-        -- Section background (inner)
+        -- Section background (inner) - positioned to create outline on sides and bottom only
         Objects.Outline = Utility.New('Frame', {
             Name = 'Background',
             BorderSizePixel = 0,
             Size = UDim2.new(1, -2, 1, -2),
-            Position = UDim2.new(0, 1, 0, 1),
+            Position = UDim2.new(0, 1, 0, 1), -- This creates the outline effect on sides and bottom only
             Parent = Objects.MainOutline,
             ZIndex = ZIndex,
             ClipsDescendants = true,
@@ -2574,7 +2574,7 @@ function Library.Section(self, cfg)
 
         Objects.Constraint = Utility.New('UISizeConstraint', {
             Parent = Objects.MainOutline,
-            MinSize = Vector2.new(0, 35),
+            MinSize = Vector2.new(0, 30),
         })
         
         ZIndex = ZIndex + 1
@@ -2595,12 +2595,12 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Top accent line - positioned at the top of the section
+        -- Top accent line - DIRECTLY AT THE TOP (Y = 0)
         Objects.AccentLine = Utility.New('Frame', {
             Name = 'AccentLine',
             BorderSizePixel = 0,
             Size = UDim2.new(1, -12, 0, 2),
-            Position = UDim2.new(0, 6, 0, 2), -- 2px from the top
+            Position = UDim2.new(0, 6, 0, 0), -- Y = 0 (directly at the top)
             Parent = Objects.Outline,
             ZIndex = ZIndex,
         }, {
@@ -2612,7 +2612,7 @@ function Library.Section(self, cfg)
             Name = 'TitleBackground',
             BorderSizePixel = 0,
             Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0, 15, 0, 0), -- 15px from left, will be updated
+            Position = UDim2.new(0, 15, 0, 0), -- 15px from left
             Parent = Objects.Outline,
             ZIndex = ZIndex + 1,
             AutomaticSize = Enum.AutomaticSize.XY,
@@ -2659,8 +2659,9 @@ function Library.Section(self, cfg)
         local function PositionTitle()
             local titleHeight = Objects.Title.TextBounds.Y
             local bgHeight = titleHeight + 2
-            -- Center the background on the accent line (accent line is at Y=2)
-            Objects.TitleBackground.Position = UDim2.new(0, 15, 0, 2 - (bgHeight / 2) + 1)
+            -- Position so HALF the background is above the accent line and HALF below
+            -- This makes the text sit perfectly on the line
+            Objects.TitleBackground.Position = UDim2.new(0, 15, 0, - (bgHeight / 2) + 1)
         end
         
         -- Wait a tiny moment for the text bounds to be calculated
@@ -2674,7 +2675,7 @@ function Library.Section(self, cfg)
         
         ZIndex = ZIndex + 1
         
-        -- Description (if provided)
+        -- Description (if provided) - positioned directly below the accent line
         if cfg.description then
             Objects.Description = Utility.New('TextLabel', {
                 Name = 'Description',
@@ -2683,7 +2684,7 @@ function Library.Section(self, cfg)
                 TextSize = Library.FontSize - 2,
                 FontFace = Library.Font,
                 Size = UDim2.new(1, -24, 0, 0),
-                Position = UDim2.new(0, 12, 0, 12), -- Positioned below the title
+                Position = UDim2.new(0, 12, 0, 10), -- Positioned directly below the accent line
                 AutomaticSize = Enum.AutomaticSize.Y,
                 Text = cfg.description,
                 TextXAlignment = Enum.TextXAlignment.Left,
@@ -2696,8 +2697,8 @@ function Library.Section(self, cfg)
             ZIndex = ZIndex + 1
         end
 
-        -- Content area
-        local contentTopOffset = cfg.description and 45 or 22
+        -- Content area - starts right after the description or title
+        local contentTopOffset = cfg.description and 35 or 15
         
         Objects.Padded = Utility.New('Frame', {
             Name = 'Padded',
@@ -2796,7 +2797,7 @@ function Library.Section(self, cfg)
                 return
             end
 
-            Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.MainOutline.AbsolutePosition.Y, 35, 9e9))
+            Objects.Constraint.MaxSize = Vector2.new(math.huge, math.clamp(input.Position.Y - Objects.MainOutline.AbsolutePosition.Y, 30, 9e9))
         end))
         
         local ResizeStop = Utility.Signal(UserInputService.InputEnded:Connect(function(input)
