@@ -3335,310 +3335,312 @@ end
         end
         
         function Library.Toggle(self, cfg)
-            cfg = cfg or {}
-            cfg = Library.Config(cfg, {
-                name = 'New Toggle',
-                description = nil,
-                value = false,
-                callback = function() end,
-                flag = nil,
-                children = nil,
+    cfg = cfg or {}
+    cfg = Library.Config(cfg, {
+        name = 'New Toggle',
+        description = nil,
+        value = false,
+        callback = function() end,
+        flag = nil,
+        children = nil,
+    })
+
+    if not cfg.flag then
+        cfg.flag = cfg.name
+    end
+
+    local Toggle = {
+        Objects = {},
+        Tweening = false,
+        ZIndex = self.ZIndex,
+        Value = false,
+    }
+    local ZIndex = Toggle.ZIndex
+    local Objects = Toggle.Objects
+
+    do
+        Objects.Holder = Utility.New('Frame', {
+            Name = 'Holder',
+            Size = UDim2.new(1, 0, 0, 0),
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BorderSizePixel = 0,
+            Parent = self.Holder, -- This is crucial - parent must be the section's holder
+            ZIndex = ZIndex,
+        })
+
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            FillDirection = Enum.FillDirection.Vertical,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = Objects.Holder,
+            Padding = UDim.new(0, 5),
+        })
+
+        ZIndex = ZIndex + 1
+        Objects.Line = Utility.New('TextButton', {
+            Name = 'Line',
+            Size = UDim2.new(1, 0, 0, 0),
+            Position = UDim2.fromOffset(0, 0),
+            BackgroundTransparency = 1,
+            AutoButtonColor = false,
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Style = Enum.ButtonStyle.Custom,
+            Text = '',
+            Parent = Objects.Holder,
+            ZIndex = ZIndex,
+        })
+
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            FillDirection = Enum.FillDirection.Vertical,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Parent = Objects.Line,
+            Padding = UDim.new(0, 2),
+        })
+
+        ZIndex = ZIndex + 1
+        
+        -- Container for checkbox + text (horizontal layout)
+        Objects.TextLine = Utility.New('Frame', {
+            Name = 'TextLine',
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Parent = Objects.Line,
+            ZIndex = ZIndex,
+        })
+        
+        -- Horizontal layout for checkbox and text
+        Utility.New('UIListLayout', {
+            Name = 'UIListLayout',
+            FillDirection = Enum.FillDirection.Horizontal,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            HorizontalAlignment = Enum.HorizontalAlignment.Left,
+            VerticalAlignment = Enum.VerticalAlignment.Center,
+            Parent = Objects.TextLine,
+            Padding = UDim.new(0, 6),
+        })
+        
+        -- Checkbox outline (smaller like before)
+        Objects.Outline = Utility.New('Frame', {
+            Name = 'Outline',
+            Size = UDim2.new(0, 14, 0, 14), -- Smaller size (was 18, now 14)
+            Position = UDim2.fromOffset(0, 0),
+            BorderSizePixel = 0,
+            BackgroundTransparency = 0,
+            Parent = Objects.TextLine,
+            ZIndex = ZIndex,
+        }, {
+            BackgroundColor3 = 'Inline',
+        })
+
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            CornerRadius = UDim.new(0, 3), -- Smaller radius
+            Parent = Objects.Outline,
+        })
+
+        ZIndex = ZIndex + 1
+        Objects.Background = Utility.New('Frame', {
+            Name = 'Background',
+            Size = UDim2.new(1, -2, 1, -2),
+            Position = UDim2.fromOffset(1, 1),
+            BorderSizePixel = 0,
+            Parent = Objects.Outline,
+            ZIndex = ZIndex,
+        }, {
+            BackgroundColor3 = 'Background',
+        })
+
+        Utility.New('UICorner', {
+            Name = 'UICorner',
+            CornerRadius = UDim.new(0, 3),
+            Parent = Objects.Background,
+        })
+
+        ZIndex = ZIndex + 1
+        Objects.Icon = Utility.New('ImageLabel', {
+            Name = 'ToggleIcon',
+            Size = UDim2.new(1, -4, 1, -4),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Image = Library.Checkmark,
+            ImageColor3 = Library.Theme.Accent,
+            Parent = Objects.Background,
+            ZIndex = ZIndex,
+            Visible = false,
+        })
+        
+        ZIndex = ZIndex + 1
+        
+        -- Text label
+        Objects.Text = Utility.New('TextLabel', {
+            Name = 'Text',
+            TextStrokeTransparency = 0.8,
+            BackgroundTransparency = 1,
+            TextSize = Library.FontSize,
+            FontFace = Library.Font,
+            Size = UDim2.new(1, -24, 0, 0), -- Adjusted for smaller checkbox
+            AutomaticSize = Enum.AutomaticSize.Y,
+            Text = cfg.name,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = Objects.TextLine,
+            ZIndex = ZIndex,
+        }, {
+            TextColor3 = 'Dark Text',
+        })
+
+        ZIndex = ZIndex + 1
+
+        if cfg.description then
+            Objects.Description = Utility.New('TextLabel', {
+                Name = 'Description',
+                TextStrokeTransparency = 0.8,
+                BackgroundTransparency = 1,
+                TextSize = Library.FontSize - 2,
+                FontFace = Library.Font,
+                Size = UDim2.new(1, -30, 0, 0), -- Indent to align with text
+                Position = UDim2.new(0, 20, 0, 0), -- Indent to align with text
+                AutomaticSize = Enum.AutomaticSize.Y,
+                Text = cfg.description,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = Objects.Line,
+                ZIndex = ZIndex,
+                TextWrapped = true,
+            }, {
+                TextColor3 = 'Light Text',
+            })
+            ZIndex = ZIndex + 1
+        end
+
+        if cfg.children ~= nil then
+            Objects.ChildrenHolder = Utility.New('Frame', {
+                Name = 'ChildrenHolder',
+                Size = UDim2.new(1, 0, 0, 0),
+                Position = UDim2.fromOffset(0, 0),
+                BackgroundTransparency = 1,
+                AutomaticSize = Enum.AutomaticSize.Y,
+                BorderSizePixel = 0,
+                Parent = Objects.Holder,
+                ZIndex = ZIndex,
+                Visible = cfg.children,
+                ClipsDescendants = true,
             })
 
-            if not cfg.flag then
-                cfg.flag = cfg.name
-            end
-
-            local Toggle = {
-                Objects = {},
-                Tweening = false,
-                ZIndex = self.ZIndex,
-                Value = false,
-            }
-            local ZIndex = Toggle.ZIndex
-            local Objects = Toggle.Objects
-
-            do
-                Objects.Holder = Utility.New('Frame', {
-                    Name = 'Holder',
-                    Size = UDim2.new(1, 0, 0, 0),
-                    Position = UDim2.fromOffset(0, 0),
-                    BackgroundTransparency = 1,
-                    AutomaticSize = Enum.AutomaticSize.Y,
-                    BorderSizePixel = 0,
-                    Parent = self.Holder,
-                    ZIndex = ZIndex,
-                })
-
-                Utility.New('UIListLayout', {
-                    Name = 'UIListLayout',
-                    FillDirection = Enum.FillDirection.Vertical,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    Parent = Objects.Holder,
-                    Padding = UDim.new(0, 5),
-                })
-
-                ZIndex = ZIndex + 1
-                Objects.Line = Utility.New('TextButton', {
-                    Name = 'Line',
-                    Size = UDim2.new(1, 0, 0, 0),
-                    Position = UDim2.fromOffset(0, 0),
-                    BackgroundTransparency = 1,
-                    AutoButtonColor = false,
-                    AutomaticSize = Enum.AutomaticSize.Y,
-                    Style = Enum.ButtonStyle.Custom,
-                    Text = '',
-                    Parent = Objects.Holder,
-                    ZIndex = ZIndex,
-                })
-
-                Utility.New('UIListLayout', {
-                    Name = 'UIListLayout',
-                    FillDirection = Enum.FillDirection.Vertical,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    Parent = Objects.Line,
-                    Padding = UDim.new(0, 2),
-                })
-
-                ZIndex = ZIndex + 1
-                Objects.Text = Utility.New('TextLabel', {
-                    Name = 'Text',
-                    TextStrokeTransparency = 0.8,
-                    BackgroundTransparency = 1,
-                    TextSize = Library.FontSize,
-                    FontFace = Library.Font,
-                    Size = UDim2.new(1, 0, 0, 0),
-                    AutomaticSize = Enum.AutomaticSize.Y,
-                    Text = cfg.name,
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = Objects.Line,
-                    ZIndex = ZIndex,
-                }, {
-                    TextColor3 = 'Dark Text',
-                })
-
-                Utility.New('UIListLayout', {
-                    Name = 'UIListLayout',
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    HorizontalAlignment = Enum.HorizontalAlignment.Right,
-                    Parent = Objects.Text,
-                    Padding = UDim.new(0, 2),
-                })
-
-                ZIndex = ZIndex + 1
-                Objects.SideHolder = Utility.New('Frame', {
-                    Name = 'SideHolder',
-                    Size = UDim2.new(0, 0, 1, 0),
-                    AutomaticSize = Enum.AutomaticSize.X,
-                    Position = UDim2.fromOffset(0, 0),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    Parent = Objects.Text,
-                    ZIndex = ZIndex,
-                })
-
-                Utility.New('UIListLayout', {
-                    Name = 'UIListLayout',
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    SortOrder = Enum.SortOrder.LayoutOrder,
-                    HorizontalAlignment = Enum.HorizontalAlignment.Right,
-                    Parent = Objects.SideHolder,
-                    Padding = UDim.new(0, 2),
-                })
-
-                Toggle.SideHolder = Objects.SideHolder
-                ZIndex = ZIndex + 1
-
-                if cfg.description then
-                    Objects.Description = Utility.New('TextLabel', {
-                        Name = 'Description',
-                        TextStrokeTransparency = 0.8,
-                        BackgroundTransparency = 1,
-                        TextSize = Library.FontSize - 2,
-                        FontFace = Library.Font,
-                        Size = UDim2.new(1, 0, 0, 0),
-                        AutomaticSize = Enum.AutomaticSize.Y,
-                        Text = cfg.description,
-                        TextXAlignment = Enum.TextXAlignment.Left,
-                        Parent = Objects.Line,
-                        ZIndex = ZIndex,
-                        TextWrapped = true,
-                    }, {
-                        TextColor3 = 'Light Text',
-                    })
-                    ZIndex = ZIndex + 1
-                end
-
-                Objects.Outline = Utility.New('Frame', {
-                    Name = 'Outline',
-                    Size = UDim2.new(0, 0, 0, 0),
-                    Position = UDim2.fromOffset(0, 0),
-                    BorderSizePixel = 0,
-                    BackgroundTransparency = 0,
-                    Parent = Objects.Text,
-                    ZIndex = ZIndex,
-                }, {
-                    BackgroundColor3 = 'Inline',
-                })
-                Objects.Outline.Size = UDim2.new(0, Objects.Text.AbsoluteSize.Y, 0, Objects.Text.AbsoluteSize.Y)
-
-                Utility.New('UICorner', {
-                    Name = 'UICorner',
-                    CornerRadius = UDim.new(0, 5),
-                    Parent = Objects.Outline,
-                })
-
-                ZIndex = ZIndex + 1
-                Objects.Background = Utility.New('Frame', {
-                    Name = 'Background',
-                    Size = UDim2.new(1, -2, 1, -2),
-                    Position = UDim2.fromOffset(1, 1),
-                    BorderSizePixel = 0,
-                    Parent = Objects.Outline,
-                    ZIndex = ZIndex,
-                }, {
-                    BackgroundColor3 = 'Background',
-                })
-
-                Utility.New('UICorner', {
-                    Name = 'UICorner',
-                    CornerRadius = UDim.new(0, 5),
-                    Parent = Objects.Background,
-                })
-
-                ZIndex = ZIndex + 1
-                Objects.Icon = Utility.New('ImageLabel', {
-                    Name = 'ToggleIcon',
-                    Size = UDim2.new(1, -4, 1, -4),
-                    Position = UDim2.new(0.5, 0, 0.5, 0),
-                    AnchorPoint = Vector2.new(0.5, 0.5),
-                    BackgroundTransparency = 1,
-                    Image = Library.Checkmark,
-                    ImageColor3 = Library.Theme.Accent,
-                    Parent = Objects.Background,
-                    ZIndex = ZIndex,
-                    Visible = false,
-                })
-                ZIndex = ZIndex + 1
-
-                if cfg.children ~= nil then
-                    Objects.ChildrenHolder = Utility.New('Frame', {
-                        Name = 'ChildrenHolder',
-                        Size = UDim2.new(1, 0, 0, 0),
-                        Position = UDim2.fromOffset(0, 0),
-                        BackgroundTransparency = 1,
-                        AutomaticSize = Enum.AutomaticSize.Y,
-                        BorderSizePixel = 0,
-                        Parent = Objects.Holder,
-                        ZIndex = ZIndex,
-                        Visible = cfg.children,
-                        ClipsDescendants = true,
-                    })
-
-                    Utility.New('UIListLayout', {
-                        Name = 'UIListLayout',
-                        FillDirection = Enum.FillDirection.Vertical,
-                        SortOrder = Enum.SortOrder.LayoutOrder,
-                        Parent = Objects.ChildrenHolder,
-                        Padding = UDim.new(0, 5),
-                    })
-
-                    Toggle.Holder = Objects.ChildrenHolder
-                    ZIndex = ZIndex + 1
-                end
-            end
-
-            Toggle.ZIndex = ZIndex
-
-            function Toggle.Children(visibility)
-                if cfg.children == nil and not Toggle.Holder then
-                    return
-                end
-                if Toggle.Tweening then
-                    return
-                end
-                if visibility == Objects.ChildrenHolder.Visible then
-                    return
-                end
-
-                Toggle.Tweening = true
-
-                if visibility then
-                    Objects.ChildrenHolder.Visible = true
-                end
-
-                for _, obj in Objects.ChildrenHolder:GetDescendants()do
-                    local Index = Utility.GetTransparency(obj)
-
-                    if not Index then
-                    end
-                    if type(Index) == 'table' then
-                        for _, prop in Index do
-                            Library.Fade(obj, prop, visibility)
-                        end
-                    else
-                        Library.Fade(obj, Index, visibility)
-                    end
-                end
-
-                local OldSize = Objects.ChildrenHolder.AbsoluteSize
-
-                Objects.ChildrenHolder.AutomaticSize = Enum.AutomaticSize.None
-                Objects.ChildrenHolder.Size = visibility and UDim2.new(1, 0, 0, 0) or UDim2.new(1, 0, 0, OldSize.Y)
-
-                local Tween = Library.Tween(Objects.ChildrenHolder, {
-                    Size = visibility and UDim2.new(1, 0, 0, OldSize.Y) or UDim2.new(1, 0, 0, 0),
-                })
-
-                Utility.Signal(Tween.Completed:Connect(function()
-                    Toggle.Tweening = false
-                    Objects.ChildrenHolder.Size = UDim2.new(1, 0, 0, 0)
-                    Objects.ChildrenHolder.AutomaticSize = Enum.AutomaticSize.Y
-                    Objects.ChildrenHolder.Visible = visibility
-                end))
-            end
+            -- Indent children
+            Utility.New('UIPadding', {
+                Name = 'UIPadding',
+                PaddingLeft = UDim.new(0, 20), -- Indent to align with text
+                Parent = Objects.ChildrenHolder,
+            })
             
-            function Toggle.Set(value)
-                if Toggle.Tweening then
-                    return
-                end
+            Utility.New('UIListLayout', {
+                Name = 'UIListLayout',
+                FillDirection = Enum.FillDirection.Vertical,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Parent = Objects.ChildrenHolder,
+                Padding = UDim.new(0, 5),
+            })
 
-                Toggle.Value = value
-
-                Toggle.Children(value)
-                
-                if Objects.Icon then
-                    Objects.Icon.Visible = value
-                    if value then
-                        Objects.Icon.ImageColor3 = Library.Theme.Accent
-                    end
-                end
-                
-                Library.ChangeObjectTheme(Objects.Text, {
-                    TextColor3 = value and 'Text' or 'Dark Text',
-                }, true)
-
-                cfg.callback(value)
-
-                Library.Flags[cfg.flag] = value
-
-                if Library.OnToggleChange then
-                    Library.OnToggleChange(cfg.name, value)
-                end
-            end
-            
-            function Toggle.Enable()
-                Toggle.Set(not Toggle.Value)
-            end
-
-            Utility.Signal(Objects.Line.MouseButton1Click:Connect(Toggle.Enable))
-            Toggle.Set(cfg.value)
-
-            Library.ConfigFlags[cfg.flag] = Toggle.Set
-
-            return setmetatable(Toggle, Library)
+            Toggle.Holder = Objects.ChildrenHolder
+            ZIndex = ZIndex + 1
         end
+    end
+
+    Toggle.ZIndex = ZIndex
+
+    function Toggle.Children(visibility)
+        if cfg.children == nil and not Toggle.Holder then
+            return
+        end
+        if Toggle.Tweening then
+            return
+        end
+        if visibility == Objects.ChildrenHolder.Visible then
+            return
+        end
+
+        Toggle.Tweening = true
+
+        if visibility then
+            Objects.ChildrenHolder.Visible = true
+        end
+
+        for _, obj in Objects.ChildrenHolder:GetDescendants()do
+            local Index = Utility.GetTransparency(obj)
+
+            if not Index then
+            end
+            if type(Index) == 'table' then
+                for _, prop in Index do
+                    Library.Fade(obj, prop, visibility)
+                end
+            else
+                Library.Fade(obj, Index, visibility)
+            end
+        end
+
+        local OldSize = Objects.ChildrenHolder.AbsoluteSize
+
+        Objects.ChildrenHolder.AutomaticSize = Enum.AutomaticSize.None
+        Objects.ChildrenHolder.Size = visibility and UDim2.new(1, 0, 0, 0) or UDim2.new(1, 0, 0, OldSize.Y)
+
+        local Tween = Library.Tween(Objects.ChildrenHolder, {
+            Size = visibility and UDim2.new(1, 0, 0, OldSize.Y) or UDim2.new(1, 0, 0, 0),
+        })
+
+        Utility.Signal(Tween.Completed:Connect(function()
+            Toggle.Tweening = false
+            Objects.ChildrenHolder.Size = UDim2.new(1, 0, 0, 0)
+            Objects.ChildrenHolder.AutomaticSize = Enum.AutomaticSize.Y
+            Objects.ChildrenHolder.Visible = visibility
+        end))
+    end
+    
+    function Toggle.Set(value)
+        if Toggle.Tweening then
+            return
+        end
+
+        Toggle.Value = value
+
+        Toggle.Children(value)
+        
+        if Objects.Icon then
+            Objects.Icon.Visible = value
+            if value then
+                Objects.Icon.ImageColor3 = Library.Theme.Accent
+            end
+        end
+        
+        Library.ChangeObjectTheme(Objects.Text, {
+            TextColor3 = value and 'Text' or 'Dark Text',
+        }, true)
+
+        cfg.callback(value)
+
+        Library.Flags[cfg.flag] = value
+
+        if Library.OnToggleChange then
+            Library.OnToggleChange(cfg.name, value)
+        end
+    end
+    
+    function Toggle.Enable()
+        Toggle.Set(not Toggle.Value)
+    end
+
+    Utility.Signal(Objects.Line.MouseButton1Click:Connect(Toggle.Enable))
+    Toggle.Set(cfg.value)
+
+    Library.ConfigFlags[cfg.flag] = Toggle.Set
+
+    return setmetatable(Toggle, Library)
+end
         
         function Library.Slider(self, cfg)
             cfg = cfg or {}
