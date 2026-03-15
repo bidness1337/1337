@@ -1,4 +1,142 @@
+--[[
+    Made by samet
 
+    Assign different flags to each element to prevent from configs overriding eachother
+    Example script is at the bottom
+
+    Documentation:
+    function Library:Window(Data: table
+        Name/name: string,
+        Size/size: UDim2
+    )
+
+    function Window:Page(Data: table
+        Name/name: string,
+        Columns/columns: number,
+        SubTabs/subtabs: boolean
+    )
+
+    function Page:SubPage(Data: table
+        Icon/icon: string,
+        Columns/columns: number
+    )
+
+    function Page:Section(Data: table
+        Name/name: string,
+        Side/side: number,
+    )
+
+    function Page:MultiSection(Data: table
+        Sections/sections: table,
+        Side/side: number
+    )
+
+    function Page:ScrollableSection(Data: table
+        Name/name: string,
+        Side/side: number,
+        Size/size: number
+    )
+
+    function Section:Divider()
+
+    function Section:Label(Data: table
+        Name/name: string,
+        Alignment/alignment: string
+    )
+
+    function Section:Toggle(Data: table
+        Name/name: string,
+        Default/default: boolean,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Section:Button(Data: table
+        Name/name: string,
+        Callback/callback: function
+    )
+
+    function Section:Slider(Data: table
+        Name/name: string,
+        Min/min: number,
+        Max/max: number,
+        Decimals/decimals: number,
+        Default/default: number,
+        Suffix/suffix: string,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Section:Textbox(Data: table
+        Name/name: string,
+        Default/default: string,
+        Placeholder/placeholder: string,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Section:Dropdown(Data: table
+        Name/name: string,
+        Items/items: table,
+        Default/default: string,
+        Flag/flag: string,
+        Multi/multi: boolean,
+        Callback/callback: function
+    )
+
+    function Section:Listbox(Data: table
+        Size/size: number,
+        Items/items: table,
+        Default/default: string,
+        Multi/multi: boolean,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Label:Keybind(Data: table
+        Name/name: string,
+        Mode/mode: string,
+        Default/default: EnumItem,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Label:Colorpicker(Data: table
+        Name/name: string,
+        Default/default: Color3,
+        Alpha/alpha: boolean,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Toggle:Colorpicker(Data: table
+        Name/name: string,
+        Default/default: Color3,
+        Alpha/alpha: boolean,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Toggle:Keybind(Data: table
+        Name/name: string,
+        Mode/mode: string,
+        Default/default: EnumItem,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Sections:Textbox(Data: table
+        Name/name: string,
+        Default/default: string,
+        Placeholder/placeholder: string,
+        Flag/flag: string,
+        Callback/callback: function
+    )
+
+    function Library:Watermark(Name: string)
+    function Library:Notification(Text: string, Duration: number, Color: Color3, Icon: table)
+    function Library:KeybindList()
+]]
 
 local LoadingTick = os.clock()
 
@@ -846,12 +984,7 @@ local Library do
                 BorderSizePixel = 0,
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
-            
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            })             
+            -- Removed UIGradient
         end
 
         function Watermark:SetVisibility(Bool)
@@ -919,12 +1052,7 @@ local Library do
                 BorderSizePixel = 0,
                 BackgroundColor3 = Color
             })  
-            
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            })
+            -- Removed UIGradient
             
             Items["Icon"] = Instances:Create("ImageLabel", {
                 Parent = Items["Notification"].Instance,
@@ -1039,12 +1167,7 @@ local Library do
                 BorderSizePixel = 0,
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
-            
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            }) 
+            -- Removed UIGradient
             
             Instances:Create("UIPadding", {
                 Parent = Items["KeybindList"].Instance,
@@ -1200,12 +1323,7 @@ local Library do
                 Name = "\0",
                 Color = FromRGB(27, 27, 32)
             }):AddToTheme({Color = "Outline"})
-            
-            Instances:Create("UIGradient", {
-                Parent = Items["ColorpickerButton"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            })             
+            -- Removed UIGradient
 
             Items["ColorpickerWindow"] = Instances:Create("TextButton", {
                 Parent = Library.Holder.Instance,
@@ -1262,12 +1380,7 @@ local Library do
                 BorderSizePixel = 0,
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
-            
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            }) 
+            -- Removed UIGradient
             
             Instances:Create("UIPadding", {
                 Parent = Items["ColorpickerWindow"].Instance,
@@ -1418,10 +1531,7 @@ local Library do
                 Transparency = NumSequence{NumSequenceKeypoint(0, 1), NumSequenceKeypoint(1, 0)}
             }) 
             
-            Instances:Create("UIGradient", {
-                Parent = Items["Alpha"].Instance,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(0, 0, 0))}
-            }) 
+            -- Removed second UIGradient from Alpha
             
             Items["AlphaDragger"] = Instances:Create("Frame", {
                 Parent = Items["Alpha"].Instance,
@@ -2386,11 +2496,7 @@ local Library do
                 BackgroundColor3 = FromRGB(27, 27, 32)
             })  Items["MiscPixel2"]:AddToTheme({BackgroundColor3 = "Outline"})
             
-            Items["UIGradient"] = Instances:Create("UIGradient", {
-                Parent = Items["Inactive"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            })
+            -- Removed UIGradient from page buttons
 
             Items["Page"] = Instances:Create("Frame", {
                 Parent = Page.Window.Elements["Content"].Instance,
@@ -2635,11 +2741,7 @@ local Library do
                 BackgroundColor3 = FromRGB(255, 255, 255)
             })  Items["Icon"]:AddToTheme({ImageColor3 = "Text"})
 
-            Instances:Create("UIGradient", {
-                Parent = Items["Inactive"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(138, 138, 138))}
-            }) 
+            -- Removed UIGradient from subtab buttons
 
             Items["Subtab"] = Instances:Create("Frame", {
                 Parent = SubPage.Page.Elements["Columns"].Instance,
@@ -2822,11 +2924,7 @@ local Library do
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            })
+            -- Removed UIGradient from section accent line
             
             Items["Text"] = Instances:Create("TextLabel", {
                 Parent = Items["Section"].Instance,
@@ -2918,11 +3016,7 @@ local Library do
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            }) 
+            -- Removed UIGradient from multi-section accent line
             
             Items["Sections"] = Instances:Create("Frame", {
                 Parent = Items["MultiSection"].Instance,
@@ -3049,11 +3143,7 @@ local Library do
                     Color = FromRGB(27, 27, 32)
                 }):AddToTheme({Color = "Outline"})
 
-                Instances:Create("UIGradient", {
-                    Parent = SubItems["Inactive"].Instance,
-                    Rotation = 90,
-                    Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(108, 108, 108))}
-                }) 
+                -- Removed UIGradient from multi-section section buttons
 
                 SubItems["Content"] = Instances:Create("Frame", {
                     Parent = Items["Content"].Instance,
@@ -3178,11 +3268,7 @@ local Library do
                 BackgroundColor3 = FromRGB(27, 27, 32)
             })  Items["Fade"]:AddToTheme({BackgroundColor3 = "Inline"})
 
-            Instances:Create("UIGradient", {
-                Parent = Items["Fade"].Instance,
-                Rotation = -90,
-                Transparency = NumSequence{NumSequenceKeypoint(0, 0), NumSequenceKeypoint(0.718, 0.768750011920929), NumSequenceKeypoint(1, 1)}
-            })
+            -- Removed UIGradient from scrollable section fade
             
             Instances:Create("UIStroke", {
                 Parent = Items["Section"].Instance,
@@ -3205,11 +3291,7 @@ local Library do
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["AccentLine"]:AddToTheme({BackgroundColor3 = "Accent"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["AccentLine"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(255, 255, 255))}
-            })
+            -- Removed UIGradient from accent line
             
             Items["Text"] = Instances:Create("TextLabel", {
                 Parent = Items["Section"].Instance,
@@ -3368,11 +3450,7 @@ local Library do
                 Color = FromRGB(27, 27, 32)
             }):AddToTheme({Color = "Outline"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["Indicator"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from indicator
             
             Items["Text"] = Instances:Create("TextLabel", {
                 Parent = Items["Toggle"].Instance,
@@ -3536,11 +3614,7 @@ local Library do
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["Button"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
 
-            Instances:Create("UIGradient", {
-                Parent = Items["Button"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from button
             
             Instances:Create("UIStroke", {
                 Parent = Items["Button"].Instance,
@@ -3688,11 +3762,7 @@ local Library do
                 Color = FromRGB(27, 27, 32)
             }):AddToTheme({Color = "Outline"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["RealSlider"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from slider background
             
             Items["Indicator"] = Instances:Create("Frame", {
                 Parent = Items["RealSlider"].Instance,
@@ -3703,11 +3773,7 @@ local Library do
                 BackgroundColor3 = FromRGB(224, 149, 176)
             })  Items["Indicator"]:AddToTheme({BackgroundColor3 = "Accent"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["Indicator"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from indicator
             
             Items["Value"] = Instances:Create("TextLabel", {
                 Parent = Items["RealSlider"].Instance,
@@ -3880,11 +3946,7 @@ local Library do
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["RealDropdown"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["RealDropdown"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from dropdown background
             
             Instances:Create("UIStroke", {
                 Parent = Items["RealDropdown"].Instance,
@@ -4400,11 +4462,7 @@ local Library do
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["Background"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
             
-            Instances:Create("UIGradient", {
-                Parent = Items["Background"].Instance,
-                Rotation = 90,
-                Color = RGBSequence{RGBSequenceKeypoint(0, FromRGB(255, 255, 255)), RGBSequenceKeypoint(1, FromRGB(100, 100, 100))}
-            }) 
+            -- Removed UIGradient from textbox background
             
             Instances:Create("UIStroke", {
                 Parent = Items["Background"].Instance,
