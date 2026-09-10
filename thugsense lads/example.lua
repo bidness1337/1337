@@ -1,6 +1,6 @@
 --
 local LoadingTick = os.clock()
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/samets-drawing-lib-for-skids/refs/heads/main/thugsense%20lads/library%20source.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/1337/refs/heads/main/thugsense%20lads/library.lua"))()
 
 local Window = Library:Window({
     Name = "wahwahwah",
