@@ -1,5 +1,5 @@
 local LoadingTick = os.clock()
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/1337/refs/heads/main/symbol-hit%20ui/theme/test%200.1%20.lua"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bidness1337/1337/refs/heads/main/symbol-hit%20ui/theme/test%200.2%20.lua"))()
 
 local Window = Library:Window({
     Name = "brrr.lol",
@@ -53,6 +53,20 @@ local Watermark = Library:Watermark({
     Rate = 0.2
 })
 
+-- ==================== ESP PREVIEW + KEYBIND LIST (from NH UI) ====================
+local ESPPreview = Library:ESPPreview({
+    name = 'esp preview',
+    visible = true,
+})
+
+local KeybindList = Library:KeybindList({
+    name = 'keybinds',
+    visible = true,
+})
+
+-- Example keybind entries
+KeybindList:Add('RCtrl', 'menu keybind', 'Toggle')
+KeybindList:Add('RCtrl', 'watermark', 'Toggle')
 
 -- ==================== SETTINGS TAB ====================
 do
@@ -131,8 +145,6 @@ do
                 if s and d then
                     pcall(function()
                         Library.LoadConfig(d)
-                        updateAllChams()
-                        updateWorldSettings()
                     end)
                 end
             end
@@ -187,7 +199,7 @@ do
 
     -- ==================== UTILITY SECTION ====================
 
-    -- Menu keybind (moved from Theme section)
+    -- Menu keybind
     us:Keybind({
         Name = 'menu keybind',
         Key = Enum.KeyCode.RightControl,
@@ -255,7 +267,7 @@ do
         Flag = 'watermark_types',
     })
 
-    -- NEW: Attach watermark toggle
+    -- Attach watermark toggle
     us:Toggle({
         Name = 'attach watermark',
         Value = true,
@@ -265,6 +277,30 @@ do
             end
         end,
         Flag = 'watermark_attached',
+    })
+
+    -- NEW: ESP Preview toggle
+    us:Toggle({
+        Name = 'esp preview',
+        Value = true,
+        Callback = function(v)
+            if ESPPreview and ESPPreview.SetVisibility then
+                ESPPreview.SetVisibility(v)
+            end
+        end,
+        Flag = 'esp_preview_enabled',
+    })
+
+    -- NEW: Keybind list toggle
+    us:Toggle({
+        Name = 'keybind list',
+        Value = true,
+        Callback = function(v)
+            if KeybindList and KeybindList.SetVisibility then
+                KeybindList.SetVisibility(v)
+            end
+        end,
+        Flag = 'keybind_list_enabled',
     })
 
     -- ==================== THEME SECTION ====================
@@ -362,9 +398,6 @@ do
 end
 
 CombatTab.Set(true)
-
--- Initialize chams after UI is built
-updateAllChams()
 
 Library.Notification({
     name = 'brrr.lol',
