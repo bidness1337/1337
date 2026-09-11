@@ -6635,7 +6635,7 @@ local Library = (function()
                 AutomaticSize = Enum.AutomaticSize.XY,
                 ZIndex = ZIndex,
             }, {
-                BackgroundColor3 = 'Background',
+                BackgroundColor3 = 'Page Background',
             })
 
             Utility.New('UICorner', {
@@ -6648,7 +6648,7 @@ local Library = (function()
                 Name = 'Outline',
                 Parent = Objects.Frame,
                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Outline'],
+                Color = Library.Theme['Inline'],
             })
 
             Objects.DarkStroke = Utility.New('UIStroke', {
@@ -6853,7 +6853,7 @@ local Library = (function()
                 BorderSizePixel = 0,
                 ZIndex = ZIndex,
             }, {
-                BackgroundColor3 = 'Background',
+                BackgroundColor3 = 'Page Background',
             })
 
             Library.Dragging(Objects.Frame, Objects.Frame)
@@ -6868,7 +6868,7 @@ local Library = (function()
                 Name = 'Outline',
                 Parent = Objects.Frame,
                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Outline'],
+                Color = Library.Theme['Inline'],
             })
 
             Objects.BorderStroke = Utility.New('UIStroke', {
@@ -6930,7 +6930,7 @@ local Library = (function()
                 BorderSizePixel = 0,
                 ZIndex = ZIndex + 1,
             }, {
-                BackgroundColor3 = 'Section Background',
+                BackgroundColor3 = 'Page Background',
             })
 
             Utility.New('UICorner', {
@@ -6943,7 +6943,7 @@ local Library = (function()
                 Name = 'Outline',
                 Parent = Objects.Background,
                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Outline'],
+                Color = Library.Theme['Inline'],
             })
 
             Objects.BgBorderStroke = Utility.New('UIStroke', {
