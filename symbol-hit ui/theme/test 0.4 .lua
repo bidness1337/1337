@@ -3097,6 +3097,59 @@ local Library = (function()
             return Popup
         end
         
+        -- Forward-declared so Toggle / Keybind can reference the KeybindList registry
+        local KeybindRegistry = {
+            Entries = {},          -- [flag] = entry
+            AttachedObjects = {},  -- [flag] = { Toggle = toggleObj, Keybind = keybindObj, Name = string }
+        }
+
+        function Library.KeybindListRegister(flag, name, keyName, mode, active)
+            if Library.KeybindList and Library.KeybindList.Register then
+                return Library.KeybindList.Register(flag, name, keyName, mode, active)
+            end
+
+            -- Fallback: store data so we can register once the list is created
+            KeybindRegistry.AttachedObjects[flag] = KeybindRegistry.AttachedObjects[flag] or {}
+            KeybindRegistry.AttachedObjects[flag].Name = name
+            KeybindRegistry.AttachedObjects[flag].Key = keyName
+            KeybindRegistry.AttachedObjects[flag].Mode = mode
+            KeybindRegistry.AttachedObjects[flag].Active = active
+        end
+
+        function Library.KeybindListUnregister(flag)
+            if Library.KeybindList and Library.KeybindList.Unregister then
+                Library.KeybindList.Unregister(flag)
+            end
+
+            KeybindRegistry.AttachedObjects[flag] = nil
+        end
+
+        function Library.KeybindListUpdate(flag, data)
+            if Library.KeybindList and Library.KeybindList.Update then
+                Library.KeybindList.Update(flag, data)
+            end
+
+            local stored = KeybindRegistry.AttachedObjects[flag]
+
+            if stored then
+                for k, v in pairs(data) do
+                    stored[k] = v
+                end
+            end
+        end
+
+        function Library.KeybindListSetActive(flag, active)
+            if Library.KeybindList and Library.KeybindList.SetActive then
+                Library.KeybindList.SetActive(flag, active)
+            end
+
+            if KeybindRegistry.AttachedObjects[flag] then
+                KeybindRegistry.AttachedObjects[flag].Active = active
+            end
+        end
+
+        Library.KeybindRegistry = KeybindRegistry
+
         function Library.Toggle(self, cfg)
             cfg = cfg or {}
             cfg = Library.Config(cfg, {
@@ -3117,6 +3170,8 @@ local Library = (function()
                 Tweening = false,
                 ZIndex = self.ZIndex,
                 Value = false,
+                Flag = cfg.flag,
+                Name = cfg.name,
             }
             local ZIndex = Toggle.ZIndex
             local Objects = Toggle.Objects
@@ -3385,6 +3440,24 @@ local Library = (function()
                 cfg.callback(value)
 
                 Library.Flags[cfg.flag] = value
+
+                -- Sync to Keybind List: enabling a boolean feature shows it there
+                local keyFlag = string.format('%s_keybind', cfg.flag)
+                local hasKeybind = Library.ConfigFlags[keyFlag] ~= nil
+
+                if value then
+                    local keybindData = Library.Flags[string.format('%s_keybind_data', keyFlag)] or {}
+
+                    Library.KeybindListRegister(
+                        keyFlag,
+                        cfg.name,
+                        keybindData.key and tostring(keybindData.key) or 'None',
+                        keybindData.mode or 'Toggle',
+                        true
+                    )
+                else
+                    Library.KeybindListSetActive(keyFlag, false)
+                end
 
                 if Library.OnToggleChange then
                     Library.OnToggleChange(cfg.name, value)
@@ -5172,6 +5245,9 @@ local Library = (function()
                 Value = false,
                 OnHold = nil,
                 Listener = nil,
+                Flag = cfg.flag,
+                Name = cfg.name,
+                AttachedToggle = nil,
             }
             local ZIndex = Keybind.ZIndex
             local Objects = Keybind.Objects
@@ -5515,6 +5591,14 @@ local Library = (function()
                     key = Keybind.Key,
                     mode = Keybind.Mode,
                 }
+
+                -- Keep the Keybind List in sync with this keybind's key / mode
+                Library.KeybindListUpdate(cfg.flag, {
+                    Name = Keybind.Name,
+                    Key = Keybind.Key and (Keybind.Key == Enum.KeyCode.Unknown and 'None' or (Library.KeyConverters[tostring(Keybind.Key.Name):lower()] or Keybind.Key.Name)) or 'None',
+                    Mode = Keybind.Mode or 'Toggle',
+                    Active = true,
+                })
             end
 
             Popup.Dropdown = Library.Dropdown({
@@ -5686,6 +5770,15 @@ local Library = (function()
                 cfg.mode,
                 cfg.value,
             }, true)
+
+            -- Register this keybind with the Keybind List immediately
+            Library.KeybindListRegister(
+                cfg.flag,
+                Keybind.Name,
+                Keybind.Key and (Keybind.Key == Enum.KeyCode.Unknown and 'None' or (Library.KeyConverters[tostring(Keybind.Key.Name):lower()] or Keybind.Key.Name)) or 'None',
+                Keybind.Mode or 'Toggle',
+                true
+            )
 
             Library.ConfigFlags[string.format('%s_data', cfg.flag)] = Keybind.Set
 
@@ -6620,6 +6713,7 @@ local Library = (function()
             Objects = {},
             Visible = cfg.visible,
             Entries = {},
+            ByFlag = {},        -- [flag] = entry  (registry keyed by flag)
         }
 
         local ZIndex = 100
@@ -6642,21 +6736,6 @@ local Library = (function()
                 Name = 'UICorner',
                 Parent = Objects.Frame,
                 CornerRadius = UDim.new(0, 5),
-            })
-
-            Objects.Stroke = Utility.New('UIStroke', {
-                Name = 'Outline',
-                Parent = Objects.Frame,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-            })
-
-            Objects.DarkStroke = Utility.New('UIStroke', {
-                Name = 'Border',
-                Parent = Objects.Frame,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-                BorderOffset = UDim.new(0, 1),
             })
 
             Objects.Title = Utility.New('TextLabel', {
@@ -6684,8 +6763,8 @@ local Library = (function()
             Objects.AccentLine = Utility.New('Frame', {
                 Name = 'AccentLine',
                 Parent = Objects.Frame,
-                Position = UDim2.new(0, -2, 0, 20),
-                Size = UDim2.new(1, 4, 0, 1),
+                Position = UDim2.new(0, 0, 0, 20),
+                Size = UDim2.new(1, 0, 0, 1),
                 BorderSizePixel = 0,
                 ZIndex = ZIndex + 1,
             }, {
@@ -6731,66 +6810,136 @@ local Library = (function()
             Objects.Title.Text = text
         end
 
-        function KeybindList.Add(key, name, mode)
-            -- Ensure all arguments are strings (FIX for the reported error)
-            if typeof(key) == 'EnumItem' then
-                key = key.Name
-            end
-            key = type(key) == 'string' and key or tostring(key)
-            name = type(name) == 'string' and name or tostring(name)
-            mode = type(mode) == 'string' and mode or tostring(mode)
+        -- Internal: create an entry row
+        local function CreateEntry(flag, name, key, mode, active)
+            key = key or 'None'
+            mode = mode or 'Toggle'
+            if active == nil then active = true end
 
             local entry = {
+                Flag = flag,
                 Key = key,
-                Name = name,
+                Name = name or flag,
                 Mode = mode,
+                Active = active,
                 Visible = true,
                 Objects = {},
             }
 
-            local entryZIndex = 100
             entry.Objects.Label = Utility.New('TextLabel', {
                 Name = 'KeybindEntry',
                 FontFace = Library.Font,
                 TextSize = Library.FontSize,
                 Parent = Objects.Content,
                 TextColor3 = Library.Theme.Text,
-                Text = string.format('[%s] %s (%s)', key, name, mode),
                 BackgroundTransparency = 1,
                 Size = UDim2.new(0, 0, 0, 15),
                 BorderSizePixel = 0,
                 AutomaticSize = Enum.AutomaticSize.X,
-                ZIndex = entryZIndex,
+                ZIndex = 100,
+                Text = '',
             }, {
                 TextColor3 = 'Text',
             })
 
-            function entry.Set(keyVal, nameVal, modeVal)
-                -- Ensure all arguments are strings (FIX for the reported error)
-                if typeof(keyVal) == 'EnumItem' then
-                    keyVal = keyVal.Name
-                end
-                entry.Key = keyVal or entry.Key
-                entry.Name = nameVal or entry.Name
-                entry.Mode = modeVal or entry.Mode
+            function entry.Update()
                 entry.Objects.Label.Text = string.format('[%s] %s (%s)', tostring(entry.Key), tostring(entry.Name), tostring(entry.Mode))
+                entry.Objects.Label.Visible = entry.Active and entry.Visible
             end
 
-            function entry.SetStatus(active)
-                if not entry.Visible then
-                    entry.Objects.Label.Visible = false
-                    return
+            function entry.Set(keyVal, nameVal, modeVal)
+                if keyVal ~= nil then
+                    if typeof(keyVal) == 'EnumItem' then
+                        keyVal = Library.KeyConverters[tostring(keyVal.Name):lower()] or keyVal.Name
+                    end
+                    entry.Key = tostring(keyVal)
                 end
-                entry.Objects.Label.Visible = active and true or false
+                if nameVal ~= nil then
+                    entry.Name = tostring(nameVal)
+                end
+                if modeVal ~= nil then
+                    entry.Mode = tostring(modeVal)
+                end
+                entry.Update()
+            end
+
+            function entry.SetActive(active)
+                entry.Active = active and true or false
+                entry.Update()
             end
 
             function entry.SetVis(vis)
-                entry.Visible = vis
-                entry.Objects.Label.Visible = vis
+                entry.Visible = vis and true or false
+                entry.Update()
             end
 
-            table.insert(KeybindList.Entries, entry)
+            entry.Update()
+
+            KeybindList.Entries[#KeybindList.Entries + 1] = entry
+            KeybindList.ByFlag[flag] = entry
             return entry
+        end
+
+        function KeybindList.Register(flag, name, key, mode, active)
+            local entry = KeybindList.ByFlag[flag]
+
+            if entry then
+                entry:Set(key, name, mode)
+                entry:SetActive(active ~= false)
+                return entry
+            end
+
+            return CreateEntry(flag, name, key, mode, active ~= false)
+        end
+
+        function KeybindList.Unregister(flag)
+            local entry = KeybindList.ByFlag[flag]
+
+            if not entry then
+                return
+            end
+
+            if entry.Objects.Label then
+                entry.Objects.Label:Destroy()
+            end
+
+            KeybindList.ByFlag[flag] = nil
+
+            local idx = table.find(KeybindList.Entries, entry)
+            if idx then
+                table.remove(KeybindList.Entries, idx)
+            end
+        end
+
+        function KeybindList.Update(flag, data)
+            local entry = KeybindList.ByFlag[flag]
+
+            if not entry then
+                return
+            end
+
+            entry:Set(data.Key, data.Name, data.Mode)
+
+            if data.Active ~= nil then
+                entry:SetActive(data.Active)
+            end
+        end
+
+        function KeybindList.SetActive(flag, active)
+            local entry = KeybindList.ByFlag[flag]
+
+            if entry then
+                entry:SetActive(active)
+            end
+        end
+
+        -- Backwards-compat helpers
+        function KeybindList.Add(key, name, mode)
+            if typeof(key) == 'EnumItem' then
+                key = Library.KeyConverters[tostring(key.Name):lower()] or key.Name
+            end
+
+            return CreateEntry(tostring(name or key), name, key, mode, true)
         end
 
         function KeybindList.Clear()
@@ -6800,6 +6949,7 @@ local Library = (function()
                 end
             end
             KeybindList.Entries = {}
+            KeybindList.ByFlag = {}
         end
 
         function KeybindList.GetBounds()
@@ -6807,6 +6957,16 @@ local Library = (function()
         end
 
         Library.KeybindList = KeybindList
+
+        -- Flush any entries that were queued before the list was created
+        if Library.KeybindRegistry and Library.KeybindRegistry.AttachedObjects then
+            for flag, data in pairs(Library.KeybindRegistry.AttachedObjects) do
+                if data.Name and data.Key then
+                    KeybindList.Register(flag, data.Name, data.Key, data.Mode, data.Active ~= false)
+                end
+            end
+        end
+
         return KeybindList
     end
 
@@ -6862,21 +7022,6 @@ local Library = (function()
                 Name = 'UICorner',
                 Parent = Objects.Frame,
                 CornerRadius = UDim.new(0, 5),
-            })
-
-            Objects.OutlineStroke = Utility.New('UIStroke', {
-                Name = 'Outline',
-                Parent = Objects.Frame,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-            })
-
-            Objects.BorderStroke = Utility.New('UIStroke', {
-                Name = 'Border',
-                Parent = Objects.Frame,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-                BorderOffset = UDim.new(0, 1),
             })
 
             Objects.AccentLine = Utility.New('Frame', {
@@ -6939,21 +7084,6 @@ local Library = (function()
                 CornerRadius = UDim.new(0, 5),
             })
 
-            Objects.BgOutlineStroke = Utility.New('UIStroke', {
-                Name = 'Outline',
-                Parent = Objects.Background,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-            })
-
-            Objects.BgBorderStroke = Utility.New('UIStroke', {
-                Name = 'Border',
-                Parent = Objects.Background,
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-                Color = Library.Theme['Inline'],
-                BorderOffset = UDim.new(0, 1),
-            })
-
             Objects.Viewport = Utility.New('ViewportFrame', {
                 Name = 'Viewport',
                 Parent = Objects.Background,
@@ -6961,6 +7091,9 @@ local Library = (function()
                 Size = UDim2.new(1, 0, 1, 0),
                 BorderSizePixel = 0,
                 ZIndex = ZIndex + 2,
+                Ambient = Color3.fromRGB(255, 255, 255),
+                LightColor = Color3.fromRGB(255, 255, 255),
+                LightDirection = Vector3.new(-1, -1, -1),
             })
 
             Objects.EmptyLabel = Utility.New('TextLabel', {
@@ -6975,7 +7108,7 @@ local Library = (function()
                 TextXAlignment = Enum.TextXAlignment.Center,
                 TextYAlignment = Enum.TextYAlignment.Center,
                 BorderSizePixel = 0,
-                Visible = true,
+                Visible = false,
                 ZIndex = ZIndex + 3,
             }, {
                 TextColor3 = 'Light Text',
@@ -7065,7 +7198,7 @@ local Library = (function()
             ESPPreview.PreviewModel = model
             ESPPreview.Player = model
 
-            Objects.EmptyLabel.Visible = not model
+            Objects.EmptyLabel.Visible = false
 
             if not model then
                 return
@@ -7096,7 +7229,6 @@ local Library = (function()
 
         function ESPPreview.SetVisibility(bool)
             ESPPreview.Visible = bool
-            Objects.Frame.Visible = bool
         end
 
         function ESPPreview.SetText(text)
@@ -7107,9 +7239,23 @@ local Library = (function()
             return Objects.Frame.AbsolutePosition, Objects.Frame.AbsoluteSize
         end
 
-        -- Heartbeat render loop
+        -- Heartbeat render loop (also keeps visibility in sync with the window)
         Utility.Connect(RunService.Heartbeat:Connect(function()
-            if not ESPPreview.PreviewModel or not Objects.Frame.Visible then
+            -- Follow the main window's open/close state
+            local windowVisible = Library.Window
+                and Library.Window.Objects
+                and Library.Window.Objects.Outline
+                and Library.Window.Objects.Outline.Visible
+
+            if Objects.Frame.Visible ~= (ESPPreview.Visible and windowVisible) then
+                Objects.Frame.Visible = ESPPreview.Visible and windowVisible
+            end
+
+            if not Objects.Frame.Visible then
+                return
+            end
+
+            if not ESPPreview.PreviewModel then
                 return
             end
 
