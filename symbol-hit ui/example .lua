@@ -366,9 +366,9 @@ CombatTab.Set(true)
 -- Initialize chams after UI is built
 updateAllChams()
 
-Library:Notification({
-    Name = 'brrr.lol',
-    Description = string.format('Loaded in %.4f seconds', os.clock() - LoadingTick),
-    Type = 'Time',
-    Time = 5,
+Library.Notification({
+    name = 'brrr.lol',
+    description = 'welcome back, brrr.lol is ready and set',
+    type = 'Time',
+    time = 5,
 })
