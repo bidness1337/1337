@@ -1183,9 +1183,7 @@ local Library = (function()
                 HuePos = nil,
             }
             local ZIndex = Popup.ZIndex
-            local Objects = Popup.Objects
-
-            do
+            local Objects = Popup.Objects            do
                 Objects.Outline = Utility.New('Frame', {
                     Name = 'Outline',
                     Size = UDim2.new(0, 220, 0, 200),
@@ -6734,6 +6732,14 @@ local Library = (function()
         end
 
         function KeybindList.Add(key, name, mode)
+            -- Ensure all arguments are strings (FIX for the reported error)
+            if typeof(key) == 'EnumItem' then
+                key = key.Name
+            end
+            key = type(key) == 'string' and key or tostring(key)
+            name = type(name) == 'string' and name or tostring(name)
+            mode = type(mode) == 'string' and mode or tostring(mode)
+
             local entry = {
                 Key = key,
                 Name = name,
@@ -6760,10 +6766,14 @@ local Library = (function()
             })
 
             function entry.Set(keyVal, nameVal, modeVal)
+                -- Ensure all arguments are strings (FIX for the reported error)
+                if typeof(keyVal) == 'EnumItem' then
+                    keyVal = keyVal.Name
+                end
                 entry.Key = keyVal or entry.Key
                 entry.Name = nameVal or entry.Name
                 entry.Mode = modeVal or entry.Mode
-                entry.Objects.Label.Text = string.format('[%s] %s (%s)', entry.Key, entry.Name, entry.Mode)
+                entry.Objects.Label.Text = string.format('[%s] %s (%s)', tostring(entry.Key), tostring(entry.Name), tostring(entry.Mode))
             end
 
             function entry.SetStatus(active)
