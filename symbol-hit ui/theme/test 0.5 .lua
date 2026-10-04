@@ -824,9 +824,6 @@ local Library = (function()
         },
         Notifications = {},
         Window = nil, -- set when Library:Window is called
-        -- Keybind List and ESP Preview references
-        KeybindList = nil,
-        ESPPreview = nil,
     }
 
     Library.__index = Library
@@ -1183,7 +1180,9 @@ local Library = (function()
                 HuePos = nil,
             }
             local ZIndex = Popup.ZIndex
-            local Objects = Popup.Objects            do
+            local Objects = Popup.Objects
+
+            do
                 Objects.Outline = Utility.New('Frame', {
                     Name = 'Outline',
                     Size = UDim2.new(0, 220, 0, 200),
@@ -1716,7 +1715,7 @@ local Library = (function()
                     Parent = Objects.ScreenGui,
                     ZIndex = ZIndex,
                     Visible = Window.Visible,
-                    ClipsDescendants = true,
+                    ClipsDescendants = false,
                 }, {
                     BackgroundColor3 = 'Page Background',
                 })
@@ -1726,6 +1725,36 @@ local Library = (function()
                     Parent = Objects.Outline,
                     CornerRadius = UDim.new(0, 5),
                 })
+
+                -- === ANIMATED ACCENT BORDER (all around window) ===
+                Objects.AccentBorder = Utility.New('UIStroke', {
+                    Name = 'AccentBorder',
+                    Parent = Objects.Outline,
+                    Thickness = 1.5,
+                    Color = Library.Theme.Accent,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Round,
+                })
+
+                Objects.BorderGradient = Utility.New('UIGradient', {
+                    Name = 'BorderGradient',
+                    Parent = Objects.AccentBorder,
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Library.Theme.Accent),
+                        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 80, 80)),
+                        ColorSequenceKeypoint.new(1, Library.Theme.Accent),
+                    }),
+                    Rotation = 0,
+                })
+
+                -- Animate border gradient rotation
+                local gradientClock = 0
+                Utility.Signal(RunService.RenderStepped:Connect(function(dt)
+                    gradientClock = (gradientClock + dt) % 6
+                    local angle = (gradientClock / 6) * 360
+                    Objects.BorderGradient.Rotation = angle
+                    Objects.AccentBorder.Thickness = 1.5 + math.sin(gradientClock * math.pi * 2) * 0.4
+                end))
 
                 ZIndex = ZIndex + 1
                 
@@ -2393,16 +2422,50 @@ local Library = (function()
                 
                 ZIndex = ZIndex + 1
                 
-                Objects.AccentLine = Utility.New('Frame', {
-                    Name = 'AccentLine',
+                -- === SECTION TOP ACCENT LINE ANIMATION (Creation sweep) ===
+                Objects.AccentLineHolder = Utility.New('Frame', {
+                    Name = 'AccentLineHolder',
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 2),
                     Position = UDim2.new(0, 0, 0, 0),
                     Parent = Objects.Outline,
                     ZIndex = ZIndex,
+                    ClipsDescendants = true,
                 }, {
                     BackgroundColor3 = 'Accent',
                 })
+
+                -- The sweep line that animates in from left
+                Objects.SweepLine = Utility.New('Frame', {
+                    Name = 'SweepLine',
+                    BorderSizePixel = 0,
+                    Size = UDim2.new(0, 0, 1, 0),
+                    Position = UDim2.new(0, 0, 0, 0),
+                    Parent = Objects.AccentLineHolder,
+                    ZIndex = ZIndex + 1,
+                    BackgroundColor3 = Library.Theme.Accent,
+                })
+
+                -- Animation on creation: sweep left-to-right then fade to gray
+                task.spawn(function()
+                    task.wait(0.05)
+                    local sweepTween = Library.Tween(Objects.SweepLine, {
+                        Size = UDim2.new(1, 0, 1, 0),
+                    }, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
+
+                    sweepTween.Completed:Wait()
+
+                    -- Fade the whole line from Accent to gray
+                    local fadeTween = Library.Tween(Objects.AccentLineHolder, {
+                        BackgroundColor3 = Library.Theme.Inline,
+                    }, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
+
+                    fadeTween.Completed:Wait()
+
+                    Objects.SweepLine:Destroy()
+                end)
+
+                Objects.AccentLine = Objects.AccentLineHolder -- alias for compatibility
                 
                 Objects.TitleBackground = Utility.New('Frame', {
                     Name = 'TitleBackground',
@@ -3097,59 +3160,6 @@ local Library = (function()
             return Popup
         end
         
-        -- Forward-declared so Toggle / Keybind can reference the KeybindList registry
-        local KeybindRegistry = {
-            Entries = {},          -- [flag] = entry
-            AttachedObjects = {},  -- [flag] = { Toggle = toggleObj, Keybind = keybindObj, Name = string }
-        }
-
-        function Library.KeybindListRegister(flag, name, keyName, mode, active)
-            if Library.KeybindList and Library.KeybindList.Register then
-                return Library.KeybindList.Register(flag, name, keyName, mode, active)
-            end
-
-            -- Fallback: store data so we can register once the list is created
-            KeybindRegistry.AttachedObjects[flag] = KeybindRegistry.AttachedObjects[flag] or {}
-            KeybindRegistry.AttachedObjects[flag].Name = name
-            KeybindRegistry.AttachedObjects[flag].Key = keyName
-            KeybindRegistry.AttachedObjects[flag].Mode = mode
-            KeybindRegistry.AttachedObjects[flag].Active = active
-        end
-
-        function Library.KeybindListUnregister(flag)
-            if Library.KeybindList and Library.KeybindList.Unregister then
-                Library.KeybindList.Unregister(flag)
-            end
-
-            KeybindRegistry.AttachedObjects[flag] = nil
-        end
-
-        function Library.KeybindListUpdate(flag, data)
-            if Library.KeybindList and Library.KeybindList.Update then
-                Library.KeybindList.Update(flag, data)
-            end
-
-            local stored = KeybindRegistry.AttachedObjects[flag]
-
-            if stored then
-                for k, v in pairs(data) do
-                    stored[k] = v
-                end
-            end
-        end
-
-        function Library.KeybindListSetActive(flag, active)
-            if Library.KeybindList and Library.KeybindList.SetActive then
-                Library.KeybindList.SetActive(flag, active)
-            end
-
-            if KeybindRegistry.AttachedObjects[flag] then
-                KeybindRegistry.AttachedObjects[flag].Active = active
-            end
-        end
-
-        Library.KeybindRegistry = KeybindRegistry
-
         function Library.Toggle(self, cfg)
             cfg = cfg or {}
             cfg = Library.Config(cfg, {
@@ -3170,8 +3180,6 @@ local Library = (function()
                 Tweening = false,
                 ZIndex = self.ZIndex,
                 Value = false,
-                Flag = cfg.flag,
-                Name = cfg.name,
             }
             local ZIndex = Toggle.ZIndex
             local Objects = Toggle.Objects
@@ -3440,24 +3448,6 @@ local Library = (function()
                 cfg.callback(value)
 
                 Library.Flags[cfg.flag] = value
-
-                -- Sync to Keybind List: enabling a boolean feature shows it there
-                local keyFlag = string.format('%s_keybind', cfg.flag)
-                local hasKeybind = Library.ConfigFlags[keyFlag] ~= nil
-
-                if value then
-                    local keybindData = Library.Flags[string.format('%s_keybind_data', keyFlag)] or {}
-
-                    Library.KeybindListRegister(
-                        keyFlag,
-                        cfg.name,
-                        keybindData.key and tostring(keybindData.key) or 'None',
-                        keybindData.mode or 'Toggle',
-                        true
-                    )
-                else
-                    Library.KeybindListSetActive(keyFlag, false)
-                end
 
                 if Library.OnToggleChange then
                     Library.OnToggleChange(cfg.name, value)
@@ -5245,9 +5235,6 @@ local Library = (function()
                 Value = false,
                 OnHold = nil,
                 Listener = nil,
-                Flag = cfg.flag,
-                Name = cfg.name,
-                AttachedToggle = nil,
             }
             local ZIndex = Keybind.ZIndex
             local Objects = Keybind.Objects
@@ -5571,7 +5558,9 @@ local Library = (function()
                         Keybind.OnHold:Disconnect()
 
                         Keybind.OnHold = nil
-                    end                    Keybind.Mode = value
+                    end
+
+                    Keybind.Mode = value
 
                     if Popup.Dropdown then
                         Popup.Dropdown.Set(Keybind.Mode, true)
@@ -5591,14 +5580,6 @@ local Library = (function()
                     key = Keybind.Key,
                     mode = Keybind.Mode,
                 }
-
-                -- Keep the Keybind List in sync with this keybind's key / mode
-                Library.KeybindListUpdate(cfg.flag, {
-                    Name = Keybind.Name,
-                    Key = Keybind.Key and (Keybind.Key == Enum.KeyCode.Unknown and 'None' or (Library.KeyConverters[tostring(Keybind.Key.Name):lower()] or Keybind.Key.Name)) or 'None',
-                    Mode = Keybind.Mode or 'Toggle',
-                    Active = true,
-                })
             end
 
             Popup.Dropdown = Library.Dropdown({
@@ -5770,15 +5751,6 @@ local Library = (function()
                 cfg.mode,
                 cfg.value,
             }, true)
-
-            -- Register this keybind with the Keybind List immediately
-            Library.KeybindListRegister(
-                cfg.flag,
-                Keybind.Name,
-                Keybind.Key and (Keybind.Key == Enum.KeyCode.Unknown and 'None' or (Library.KeyConverters[tostring(Keybind.Key.Name):lower()] or Keybind.Key.Name)) or 'None',
-                Keybind.Mode or 'Toggle',
-                true
-            )
 
             Library.ConfigFlags[string.format('%s_data', cfg.flag)] = Keybind.Set
 
@@ -6699,600 +6671,6 @@ local Library = (function()
         Bin:add(function()
             Library.Unload()
         end)
-    end
-
-    -- ==================== KEYBIND LIST (from NH UI) ====================
-    function Library.KeybindList(cfg)
-        cfg = cfg or {}
-        cfg = Library.Config(cfg, {
-            name = 'Keybinds',
-            visible = true,
-        })
-
-        local KeybindList = {
-            Objects = {},
-            Visible = cfg.visible,
-            Entries = {},
-            ByFlag = {},        -- [flag] = entry  (registry keyed by flag)
-        }
-
-        local ZIndex = 100
-        local Objects = KeybindList.Objects
-
-        do
-            Objects.Frame = Utility.New('Frame', {
-                Name = 'KeybindList',
-                Parent = Library.ScreenGui,
-                AnchorPoint = Vector2.new(0, 0.5),
-                Position = UDim2.new(0, 10, 0.5, 0),
-                BorderSizePixel = 0,
-                AutomaticSize = Enum.AutomaticSize.XY,
-                ZIndex = ZIndex,
-            }, {
-                BackgroundColor3 = 'Page Background',
-            })
-
-            Utility.New('UICorner', {
-                Name = 'UICorner',
-                Parent = Objects.Frame,
-                CornerRadius = UDim.new(0, 5),
-            })
-
-            Objects.Title = Utility.New('TextLabel', {
-                Name = 'Title',
-                FontFace = Library.Font,
-                TextSize = Library.FontSize,
-                Parent = Objects.Frame,
-                TextColor3 = Library.Theme.Text,
-                Text = cfg.name,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 0, 0, 15),
-                AutomaticSize = Enum.AutomaticSize.X,
-                ZIndex = ZIndex + 1,
-            })
-
-            Utility.New('UIPadding', {
-                Name = 'UIPadding',
-                Parent = Objects.Frame,
-                PaddingTop = UDim.new(0, 4),
-                PaddingBottom = UDim.new(0, 4),
-                PaddingRight = UDim.new(0, 8),
-                PaddingLeft = UDim.new(0, 8),
-            })
-
-            Objects.AccentLine = Utility.New('Frame', {
-                Name = 'AccentLine',
-                Parent = Objects.Frame,
-                Position = UDim2.new(0, 0, 0, 20),
-                Size = UDim2.new(1, 0, 0, 1),
-                BorderSizePixel = 0,
-                ZIndex = ZIndex + 1,
-            }, {
-                BackgroundColor3 = 'Accent',
-            })
-
-            Objects.Content = Utility.New('Frame', {
-                Name = 'Content',
-                Parent = Objects.Frame,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 0, 0, 25),
-                BorderSizePixel = 0,
-                AutomaticSize = Enum.AutomaticSize.XY,
-                ZIndex = ZIndex + 1,
-            })
-
-            Utility.New('UIListLayout', {
-                Name = 'UIListLayout',
-                Parent = Objects.Content,
-                Padding = UDim.new(0, 2),
-                SortOrder = Enum.SortOrder.LayoutOrder,
-            })
-
-            Utility.New('UIPadding', {
-                Name = 'UIPadding',
-                Parent = Objects.Frame,
-                PaddingTop = UDim.new(0, 4),
-                PaddingBottom = UDim.new(0, 4),
-                PaddingRight = UDim.new(0, 8),
-                PaddingLeft = UDim.new(0, 8),
-            })
-
-            -- Make draggable
-            Library.Dragging(Objects.Frame, Objects.Frame)
-        end
-
-        function KeybindList.SetVisibility(bool)
-            KeybindList.Visible = bool
-            Objects.Frame.Visible = bool
-        end
-
-        function KeybindList.SetText(text)
-            Objects.Title.Text = text
-        end
-
-        -- Internal: create an entry row
-        local function CreateEntry(flag, name, key, mode, active)
-            key = key or 'None'
-            mode = mode or 'Toggle'
-            if active == nil then active = true end
-
-            local entry = {
-                Flag = flag,
-                Key = key,
-                Name = name or flag,
-                Mode = mode,
-                Active = active,
-                Visible = true,
-                Objects = {},
-            }
-
-            entry.Objects.Label = Utility.New('TextLabel', {
-                Name = 'KeybindEntry',
-                FontFace = Library.Font,
-                TextSize = Library.FontSize,
-                Parent = Objects.Content,
-                TextColor3 = Library.Theme.Text,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 0, 0, 15),
-                BorderSizePixel = 0,
-                AutomaticSize = Enum.AutomaticSize.X,
-                ZIndex = 100,
-                Text = '',
-            }, {
-                TextColor3 = 'Text',
-            })
-
-            function entry.Update()
-                entry.Objects.Label.Text = string.format('[%s] %s (%s)', tostring(entry.Key), tostring(entry.Name), tostring(entry.Mode))
-                entry.Objects.Label.Visible = entry.Active and entry.Visible
-            end
-
-            function entry.Set(keyVal, nameVal, modeVal)
-                if keyVal ~= nil then
-                    if typeof(keyVal) == 'EnumItem' then
-                        keyVal = Library.KeyConverters[tostring(keyVal.Name):lower()] or keyVal.Name
-                    end
-                    entry.Key = tostring(keyVal)
-                end
-                if nameVal ~= nil then
-                    entry.Name = tostring(nameVal)
-                end
-                if modeVal ~= nil then
-                    entry.Mode = tostring(modeVal)
-                end
-                entry.Update()
-            end
-
-            function entry.SetActive(active)
-                entry.Active = active and true or false
-                entry.Update()
-            end
-
-            function entry.SetVis(vis)
-                entry.Visible = vis and true or false
-                entry.Update()
-            end
-
-            entry.Update()
-
-            KeybindList.Entries[#KeybindList.Entries + 1] = entry
-            KeybindList.ByFlag[flag] = entry
-            return entry
-        end
-
-        function KeybindList.Register(flag, name, key, mode, active)
-            local entry = KeybindList.ByFlag[flag]
-
-            if entry then
-                entry:Set(key, name, mode)
-                entry:SetActive(active ~= false)
-                return entry
-            end
-
-            return CreateEntry(flag, name, key, mode, active ~= false)
-        end
-
-        function KeybindList.Unregister(flag)
-            local entry = KeybindList.ByFlag[flag]
-
-            if not entry then
-                return
-            end
-
-            if entry.Objects.Label then
-                entry.Objects.Label:Destroy()
-            end
-
-            KeybindList.ByFlag[flag] = nil
-
-            local idx = table.find(KeybindList.Entries, entry)
-            if idx then
-                table.remove(KeybindList.Entries, idx)
-            end
-        end
-
-        function KeybindList.Update(flag, data)
-            local entry = KeybindList.ByFlag[flag]
-
-            if not entry then
-                return
-            end
-
-            entry:Set(data.Key, data.Name, data.Mode)
-
-            if data.Active ~= nil then
-                entry:SetActive(data.Active)
-            end
-        end
-
-        function KeybindList.SetActive(flag, active)
-            local entry = KeybindList.ByFlag[flag]
-
-            if entry then
-                entry:SetActive(active)
-            end
-        end
-
-        -- Backwards-compat helpers
-        function KeybindList.Add(key, name, mode)
-            if typeof(key) == 'EnumItem' then
-                key = Library.KeyConverters[tostring(key.Name):lower()] or key.Name
-            end
-
-            return CreateEntry(tostring(name or key), name, key, mode, true)
-        end
-
-        function KeybindList.Clear()
-            for _, entry in ipairs(KeybindList.Entries) do
-                if entry.Objects.Label then
-                    entry.Objects.Label:Destroy()
-                end
-            end
-            KeybindList.Entries = {}
-            KeybindList.ByFlag = {}
-        end
-
-        function KeybindList.GetBounds()
-            return Objects.Frame.AbsolutePosition, Objects.Frame.AbsoluteSize
-        end
-
-        Library.KeybindList = KeybindList
-
-        -- Flush any entries that were queued before the list was created
-        if Library.KeybindRegistry and Library.KeybindRegistry.AttachedObjects then
-            for flag, data in pairs(Library.KeybindRegistry.AttachedObjects) do
-                if data.Name and data.Key then
-                    KeybindList.Register(flag, data.Name, data.Key, data.Mode, data.Active ~= false)
-                end
-            end
-        end
-
-        return KeybindList
-    end
-
-    -- ==================== ESP PREVIEW (from NH UI) ====================
-    function Library.ESPPreview(cfg)
-        cfg = cfg or {}
-        cfg = Library.Config(cfg, {
-            name = 'ESP Preview',
-            visible = true,
-        })
-
-        local ESPPreview = {
-            Objects = {},
-            Visible = cfg.visible,
-            Player = nil,
-            RenderObjects = {},
-            Connections = {},
-            ViewportCamera = nil,
-            PreviewModel = nil,
-        }
-
-        local ZIndex = 100
-        local Objects = ESPPreview.Objects
-        local OFFSET = CFrame.new(0, 2.5, -8.5)
-
-        local ValidClasses = {
-            MeshPart = true,
-            Part = true,
-            Accoutrement = true,
-            Pants = true,
-            Shirt = true,
-            Humanoid = true,
-            BoxHandleAdornment = true,
-            CylinderHandleAdornment = true,
-            Highlight = true,
-        }
-
-        do
-            Objects.Frame = Utility.New('Frame', {
-                Name = 'ESPPreview',
-                Parent = Library.ScreenGui,
-                Position = UDim2.new(0, 860, 0, 430),
-                Size = UDim2.new(0, 258, 0, 334),
-                BorderSizePixel = 0,
-                ZIndex = ZIndex,
-            }, {
-                BackgroundColor3 = 'Page Background',
-            })
-
-            Library.Dragging(Objects.Frame, Objects.Frame)
-
-            Utility.New('UICorner', {
-                Name = 'UICorner',
-                Parent = Objects.Frame,
-                CornerRadius = UDim.new(0, 5),
-            })
-
-            Objects.AccentLine = Utility.New('Frame', {
-                Name = 'AccentLine',
-                Parent = Objects.Frame,
-                Size = UDim2.new(1, 0, 0, 1),
-                BorderSizePixel = 0,
-                ZIndex = ZIndex + 1,
-            }, {
-                BackgroundColor3 = 'Accent',
-            })
-
-            Objects.DarkLine = Utility.New('Frame', {
-                Name = 'DarkLine',
-                Parent = Objects.Frame,
-                Position = UDim2.new(0, 0, 0, 1),
-                Size = UDim2.new(1, 0, 0, 1),
-                BorderSizePixel = 0,
-                ZIndex = ZIndex + 1,
-            }, {
-                BackgroundColor3 = 'Inline',
-            })
-
-            Objects.Title = Utility.New('TextLabel', {
-                Name = 'Title',
-                FontFace = Library.Font,
-                TextSize = Library.FontSize,
-                Parent = Objects.Frame,
-                TextColor3 = Library.Theme.Accent,
-                Text = cfg.name,
-                Size = UDim2.new(0, 0, 0, 15),
-                Position = UDim2.new(0, 10, 0, 6),
-                BackgroundTransparency = 1,
-                TextXAlignment = Enum.TextXAlignment.Left,
-                BorderSizePixel = 0,
-                AutomaticSize = Enum.AutomaticSize.X,
-                ZIndex = ZIndex + 2,
-            }, {
-                TextColor3 = 'Accent',
-            })
-
-            Objects.Background = Utility.New('TextButton', {
-                Name = 'Background',
-                Parent = Objects.Frame,
-                Active = false,
-                Text = '',
-                AutoButtonColor = false,
-                Position = UDim2.new(0, 10, 0, 30),
-                Size = UDim2.new(1, -20, 1, -40),
-                Selectable = false,
-                BorderSizePixel = 0,
-                ZIndex = ZIndex + 1,
-            }, {
-                BackgroundColor3 = 'Page Background',
-            })
-
-            Utility.New('UICorner', {
-                Name = 'UICorner',
-                Parent = Objects.Background,
-                CornerRadius = UDim.new(0, 5),
-            })
-
-            Objects.Viewport = Utility.New('ViewportFrame', {
-                Name = 'Viewport',
-                Parent = Objects.Background,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                BorderSizePixel = 0,
-                ZIndex = ZIndex + 2,
-                Ambient = Color3.fromRGB(255, 255, 255),
-                LightColor = Color3.fromRGB(255, 255, 255),
-                LightDirection = Vector3.new(-1, -1, -1),
-            })
-
-            Objects.EmptyLabel = Utility.New('TextLabel', {
-                Name = 'EmptyLabel',
-                FontFace = Library.Font,
-                TextSize = Library.FontSize,
-                Parent = Objects.Background,
-                TextColor3 = Library.Theme['Light Text'],
-                Text = 'No character',
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                TextXAlignment = Enum.TextXAlignment.Center,
-                TextYAlignment = Enum.TextYAlignment.Center,
-                BorderSizePixel = 0,
-                Visible = false,
-                ZIndex = ZIndex + 3,
-            }, {
-                TextColor3 = 'Light Text',
-            })
-        end
-
-        ESPPreview.ViewportCamera = Instance.new('Camera')
-        Objects.Viewport.CurrentCamera = ESPPreview.ViewportCamera
-        ESPPreview.ViewportCamera.CameraType = Enum.CameraType.Track
-        ESPPreview.ViewportCamera.Focus = CFrame.new(0, 0, 0)
-        ESPPreview.ViewportCamera.CFrame = CFrame.new(0, 0, 0)
-
-        local function DisconnectAll()
-            for _, conn in ipairs(ESPPreview.Connections) do
-                if conn and conn.Connected then
-                    conn:Disconnect()
-                end
-            end
-            table.clear(ESPPreview.Connections)
-        end
-
-        local function ClearViewport()
-            table.clear(ESPPreview.RenderObjects)
-            for _, obj in ipairs(Objects.Viewport:GetChildren()) do
-                if not obj:IsA('Camera') then
-                    obj:Destroy()
-                end
-            end
-        end
-
-        function ESPPreview.RemoveObject(object)
-            local clone = ESPPreview.RenderObjects[object]
-            if not clone then
-                return
-            end
-            ESPPreview.RenderObjects[object] = nil
-            if clone.Parent and clone.Parent:IsA('Accoutrement') then
-                clone.Parent:Destroy()
-            else
-                clone:Destroy()
-            end
-        end
-
-        function ESPPreview.AddObject(object)
-            if not object or not ValidClasses[object.ClassName] then
-                return
-            end
-
-            local isArchivable = object.Archivable
-            object.Archivable = true
-            local clone = object:Clone()
-            object.Archivable = isArchivable
-
-            if object:IsA('BasePart') then
-                ESPPreview.RenderObjects[object] = clone
-            elseif object:IsA('Accoutrement') then
-                if object:FindFirstChild('Handle') and clone:FindFirstChild('Handle') then
-                    ESPPreview.RenderObjects[object.Handle] = clone.Handle
-                end
-            elseif object:IsA('Humanoid') then
-                clone:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Running, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-                clone:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-                clone.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-            end
-
-            return clone
-        end
-
-        function ESPPreview.BuildFromModel(model)
-            ClearViewport()
-            DisconnectAll()
-
-            ESPPreview.PreviewModel = model
-            ESPPreview.Player = model
-
-            Objects.EmptyLabel.Visible = false
-
-            if not model then
-                return
-            end
-
-            local viewmodel = Instance.new('Model')
-            viewmodel.Name = 'Viewmodel'
-            viewmodel.Parent = Objects.Viewport
-
-            for _, object in ipairs(model:GetDescendants()) do
-                local clone = ESPPreview.AddObject(object)
-                if clone then
-                    clone.Parent = viewmodel
-                end
-            end
-
-            table.insert(ESPPreview.Connections, model.DescendantAdded:Connect(function(object)
-                local clone = ESPPreview.AddObject(object)
-                if clone then
-                    clone.Parent = viewmodel
-                end
-            end))
-
-            table.insert(ESPPreview.Connections, model.DescendantRemoving:Connect(function(object)
-                ESPPreview.RemoveObject(object)
-            end))
-        end
-
-        function ESPPreview.SetVisibility(bool)
-            ESPPreview.Visible = bool
-        end
-
-        function ESPPreview.SetText(text)
-            Objects.Title.Text = text
-        end
-
-        function ESPPreview.GetBounds()
-            return Objects.Frame.AbsolutePosition, Objects.Frame.AbsoluteSize
-        end
-
-        -- Heartbeat render loop (also keeps visibility in sync with the window)
-        Utility.Connect(RunService.Heartbeat:Connect(function()
-            -- Follow the main window's open/close state
-            local windowVisible = Library.Window
-                and Library.Window.Objects
-                and Library.Window.Objects.Outline
-                and Library.Window.Objects.Outline.Visible
-
-            if Objects.Frame.Visible ~= (ESPPreview.Visible and windowVisible) then
-                Objects.Frame.Visible = ESPPreview.Visible and windowVisible
-            end
-
-            if not Objects.Frame.Visible then
-                return
-            end
-
-            if not ESPPreview.PreviewModel then
-                return
-            end
-
-            local root = ESPPreview.PreviewModel:FindFirstChild('HumanoidRootPart')
-            if not root then
-                return
-            end
-
-            ESPPreview.ViewportCamera.CFrame = CFrame.new(root.CFrame:ToWorldSpace(OFFSET).Position, root.Position)
-
-            for original, clone in pairs(ESPPreview.RenderObjects) do
-                if original and original.Parent then
-                    if clone.Parent then
-                        clone.CFrame = original.CFrame
-                    else
-                        ESPPreview.RemoveObject(original)
-                    end
-                else
-                    ESPPreview.RemoveObject(original)
-                end
-            end
-        end))
-
-        -- Auto-attach to local character
-        task.spawn(function()
-            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-            task.wait(1)
-            ESPPreview.BuildFromModel(character)
-        end)
-
-        Utility.Connect(LocalPlayer.CharacterAdded:Connect(function(newCharacter)
-            task.wait(1)
-            ESPPreview.BuildFromModel(newCharacter)
-        end))
-
-        Library.ESPPreview = ESPPreview
-        return ESPPreview
     end
 
     getgenv().Library = Library
